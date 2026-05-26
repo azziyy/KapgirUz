@@ -1,0 +1,903 @@
+/* ─────────────────────────────────────────────
+   27. RESPONSIVE
+───────────────────────────────────────────── */
+@media (min-width: 600px) {
+  .products-grid,
+  .grid-2 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .products-grid,
+  .grid-2 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   28. v2 ADDITIONS — Search filters, Gallery, Simple Video, Qty
+═══════════════════════════════════════════════════════════════ */
+
+/* ───── Search Filters ───── */
+.search-filters {
+  padding: 0 16px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.filter-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  align-items: center;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+.filter-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+.filter-chip {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border-radius: var(--r-full);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--border-subtle);
+  transition: all var(--t-base);
+  white-space: nowrap;
+}
+.filter-chip.small {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.filter-chip.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.filter-chip:active { transform: scale(0.95); }
+
+/* ───── Product Card Qty Control (replaces + button) ───── */
+.product-cart-wrap {
+  display: inline-flex;
+  align-items: center;
+}
+.card-qty-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-tertiary);
+  border-radius: var(--r-full);
+  padding: 3px;
+  border: 1px solid var(--border-subtle);
+}
+.card-qty-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--t-base);
+}
+.card-qty-btn svg {
+  width: 14px;
+  height: 14px;
+}
+.card-qty-btn:active { transform: scale(0.85); }
+.card-qty-value {
+  min-width: 18px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-primary);
+  padding: 0 2px;
+}
+
+/* ───── Product Detail Gallery ───── */
+.product-detail-gallery {
+  position: relative;
+  background: var(--bg-tertiary);
+  width: 100%;
+}
+.gallery-main {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--bg-tertiary);
+}
+.gallery-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gallery-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.gallery-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  cursor: zoom-in;
+  display: block;
+}
+/* Thumbnails + dots qatori (rasm OSTIDA) */
+.gallery-thumbs-row {
+  background: var(--bg-secondary);
+  padding: 8px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.gallery-dots {
+  position: relative;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  padding: 4px 0 2px;
+}
+.gallery-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  transition: all var(--t-base);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.gallery-dot.active {
+  background: #fff;
+  width: 22px;
+  border-radius: var(--r-full);
+}
+.gallery-thumbs {
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+  overflow-x: auto;
+  width: 100%;
+  justify-content: flex-start;
+  background: transparent;
+}
+.gallery-thumbs::-webkit-scrollbar { display: none; }
+.gallery-thumb {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color var(--t-base);
+  background: var(--bg-tertiary);
+}
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.gallery-thumb.active {
+  border-color: var(--accent);
+}
+
+/* ───── Detail Qty Control ───── */
+.detail-qty-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--accent);
+  border-radius: var(--r-lg);
+  padding: 8px 12px;
+  width: 100%;
+  min-height: 48px;
+}
+.detail-qty-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--t-base);
+}
+.detail-qty-btn svg { width: 18px; height: 18px; }
+.detail-qty-btn:active { transform: scale(0.88); }
+.detail-qty-value {
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  flex: 1;
+  text-align: center;
+}
+
+/* ───── Simple Video Player ───── */
+.video-player.simple {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.97);
+}
+.video-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  max-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.video-player video {
+  max-width: 100%;
+  max-height: 100vh;
+  background: #000;
+  cursor: pointer;
+}
+.video-play-pause {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.25s ease, transform var(--t-base);
+  z-index: 4;
+  opacity: 0;
+  pointer-events: auto;
+}
+.video-wrap:hover .video-play-pause,
+.video-wrap:active .video-play-pause,
+.video-player.simple video[paused] ~ .video-play-pause {
+  opacity: 1;
+}
+.video-play-pause svg { width: 34px; height: 34px; }
+.video-play-pause:active { transform: translate(-50%, -50%) scale(0.92); }
+/* Always show on touch devices when paused */
+@media (hover: none) {
+  .video-play-pause { opacity: 1; }
+}
+
+/* ───── Stories wrap hidden state ───── */
+.stories-wrap.hidden { display: none; }
+
+/* ───── Detail cart wrap stretches ───── */
+.detail-cart-wrap {
+  display: flex;
+  align-items: stretch;
+}
+.detail-cart-wrap > * {
+  width: 100%;
+}
+
+/* ───── Product modal must appear ABOVE collection modal ───── */
+#productModal { z-index: 8500; }
+#cartModal { z-index: 8200; }
+#newsModal { z-index: 8200; }
+#sectionAllModal { z-index: 8100; }
+#collectionModal { z-index: 8000; }
+
+/* ───── PRODUCT VIEW MODAL = FULL WIDTH, TALLER IMAGE ───── */
+.gallery-main {
+  aspect-ratio: 3 / 4 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 80vh;
+}
+.gallery-main img,
+.gallery-slide img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+.product-detail-image:not(.collection-cover) {
+  aspect-ratio: 3 / 4 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 80vh;
+}
+.product-detail-image:not(.collection-cover) img {
+  object-fit: contain !important;
+  object-position: center !important;
+}
+/* Collection cover keeps a wider ratio (collections are landscape banners) */
+.product-detail-image.collection-cover {
+  aspect-ratio: 16 / 9;
+}
+.product-detail-image.collection-cover img {
+  object-fit: cover;
+}
+
+/* ───── Fullscreen image viewer — fill the screen ───── */
+.image-viewer img {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ───── Section "See all" body ───── */
+.section-all-body {
+  padding: 8px 0 24px;
+  min-height: 200px;
+}
+
+/* ───── Nav center cart badge ───── */
+.nav-center-btn { position: relative; }
+.nav-cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  background: #fff;
+  color: var(--accent-dark);
+  border-radius: var(--r-full);
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  border: 2px solid var(--bg-primary);
+  display: none;
+}
+.nav-cart-badge.bump {
+  animation: cartBump 0.5s var(--t-spring);
+}
+
+/* ───── LIST card specs row ───── */
+.list-card-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.list-card-specs span {
+  background: var(--bg-tertiary);
+  padding: 2px 8px;
+  border-radius: var(--r-sm);
+}
+
+/* ───── Story CTA — ensure visible, on top, fully interactive ───── */
+.story-cta {
+  position: absolute;
+  bottom: calc(32px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 22px;
+  background: var(--grad-accent);
+  color: #fff;
+  border-radius: var(--r-full);
+  font-weight: 800;
+  font-size: 14px;
+  box-shadow: 0 10px 28px rgba(255, 107, 53, 0.45), 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 10;
+  pointer-events: auto;
+  letter-spacing: 0.2px;
+  animation: storyCtaIn 0.6s var(--t-spring) 0.2s both;
+}
+.story-cta svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.story-cta svg:last-child { width: 14px; height: 14px; }
+.story-cta:active { transform: translateX(-50%) scale(0.95); }
+@keyframes storyCtaIn {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Make nav-left/right tap zones smaller so they don't cover the CTA */
+.story-nav-left,
+.story-nav-right {
+  bottom: 100px; /* leave room for CTA */
+}
+
+/* ───── ANIMATION FIX: restart on show, no double-flash ───── */
+.bottom-sheet { animation: fadeIn 0.25s ease both; }
+.bottom-sheet .sheet-content { animation: sheetUp 0.4s var(--t-spring) both; }
+.bottom-sheet.hidden { animation: none !important; }
+.bottom-sheet.hidden .sheet-content { animation: none !important; }
+
+/* ───── Sheet content side fix — no empty space on right ───── */
+.sheet-content {
+  width: 100%;
+  margin: 0;
+  max-width: 100%;
+}
+@media (min-width: 720px) {
+  .sheet-content {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+/* ───── PRODUCT MODAL IMAGE — full width, taller, no empty space ───── */
+#productModalBody {
+  width: 100%;
+}
+#productModalBody .product-detail-gallery,
+#productModalBody .product-detail-image {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+#productModalBody .gallery-main {
+  width: 100% !important;
+  max-width: 100% !important;
+  aspect-ratio: 3 / 4 !important;
+  max-height: none;
+  background: var(--bg-tertiary);
+}
+#productModalBody .gallery-main img,
+#productModalBody .gallery-slide img,
+#productModalBody .product-detail-image img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  display: block;
+}
+
+/* Grid & carousel cards — taller image so vertical products show fully */
+.products-grid .product-img-wrap,
+.grid-2 .product-img-wrap,
+.carousel-scroll .product-img-wrap {
+  aspect-ratio: 3 / 4 !important;
+}
+.products-grid .product-img,
+.grid-2 .product-img,
+.carousel-scroll .product-img,
+.products-grid .card-slide-img,
+.grid-2 .card-slide-img,
+.carousel-scroll .card-slide-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FIX: STORY VA MAHSULOT RASMLARI O'NG CHETIDA CHIQAYOTGAN
+   KERAKSIZ BELGI/MATNLARNI YASHIRISH (overflow leakage fix)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* 1) Sahifa darajasida gorizontal toshib chiqishni qat'iy to'xtatish */
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: clip;
+  overflow-x: hidden;
+}
+
+/* Safe-area inset uchun chap/o'ng o'zgaruvchilar (notch va yumaloq burchakli ekranlar uchun) */
+:root {
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* 2) Story Viewer — to'liq ekranni qoplaydi, chetlardan hech narsa ko'rinmaydi */
+.story-viewer {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-width: 100vw !important;
+  max-height: 100dvh !important;
+  background: #000 !important;
+  overflow: hidden !important;
+  isolation: isolate;
+}
+
+.story-content {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100vw !important;
+  overflow: hidden !important;
+  background: #000;
+}
+
+.story-content > img,
+.story-content > video {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  object-fit: cover !important;
+}
+
+/* 3) Bottom-sheet (Mahsulot, Savatcha, Yangiliklar, Kolleksiya) — chetlardan toshmasin */
+.bottom-sheet {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  overflow: hidden !important;
+  isolation: isolate;
+}
+
+.sheet-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.sheet-content {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow: hidden auto !important;
+  overflow-x: hidden !important;
+  background: var(--bg-secondary) !important;
+}
+
+@media (min-width: 720px) {
+  .sheet-content {
+    max-width: 600px !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* 4) Mahsulot detail galereyasi — qat'iy width va overflow hidden */
+#productModalBody,
+#collectionBody,
+#sectionAllBody,
+#newsBody,
+#cartBody {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  position: relative;
+}
+
+.product-detail-gallery,
+.gallery-main,
+.product-detail-image {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.gallery-slide,
+.gallery-slide img,
+.product-detail-image img {
+  max-width: 100% !important;
+  overflow: hidden;
+}
+
+/* 5) Fullscreen image va video viewer — to'liq ekran, leakage yo'q */
+.image-viewer,
+.video-player {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-width: 100vw !important;
+  background: rgba(0, 0, 0, 0.98) !important;
+  overflow: hidden !important;
+  isolation: isolate;
+}
+
+.image-viewer img,
+.video-player video {
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+/* 6) Product card grid — har bir rasm o'z konteyneridan tashqariga chiqmasin */
+.product-card,
+.product-img-wrap,
+.story-item,
+.story-ring,
+.story-ring-inner,
+.news-card,
+.news-card-img,
+.collection-card,
+.hero-card {
+  overflow: hidden !important;
+  max-width: 100%;
+}
+
+/* 7) Modal/sheet ochilganda floating-tg va boshqa fixed elementlar yashirinsin */
+body:has(.story-viewer:not(.hidden)) .floating-tg,
+body:has(.image-viewer:not(.hidden)) .floating-tg,
+body:has(.video-player:not(.hidden)) .floating-tg,
+body:has(.bottom-sheet:not(.hidden)) .floating-tg {
+  display: none !important;
+}
+
+body:has(.story-viewer:not(.hidden)) .app-header,
+body:has(.story-viewer:not(.hidden)) .bottom-nav,
+body:has(.image-viewer:not(.hidden)) .app-header,
+body:has(.image-viewer:not(.hidden)) .bottom-nav,
+body:has(.video-player:not(.hidden)) .app-header,
+body:has(.video-player:not(.hidden)) .bottom-nav {
+  visibility: hidden !important;
+}
+
+/* 8) Har qanday matnli element modal ichida chetlardan toshmasin */
+.story-viewer *,
+.bottom-sheet *,
+.image-viewer *,
+.video-player * {
+  max-width: 100% !important;
+}
+
+/* Lekin SVG va img ichidagi elementlarga max-width chek bo'lmasligi kerak */
+.story-viewer svg,
+.bottom-sheet svg,
+.image-viewer svg,
+.video-player svg,
+.story-viewer svg *,
+.bottom-sheet svg *,
+.image-viewer svg *,
+.video-player svg * {
+  max-width: none !important;
+}
+
+/* 9) Floating TG tugmasi safe-area'ni hisobga olsin */
+.floating-tg {
+  right: calc(16px + var(--safe-right)) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROFIL: "Dasturni yangilash" tugmasi uchun maxsus stil
+   ═══════════════════════════════════════════════════════════════ */
+.profile-menu-item.update-app .menu-icon.update-icon {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+}
+
+.profile-menu-item.update-app {
+  position: relative;
+}
+
+.profile-menu-item.update-app::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 44px;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: updatePulse 2s infinite;
+}
+
+@keyframes updatePulse {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+  70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   YAKUNIY TUZATISHLAR (FINAL FIXES)
+   1) Mahsulot rasm ochilganda o'ng chetida chiqayotgan
+      "/>", '""' kabi keraksiz belgilarni butunlay yashirish
+   2) Asosiy sahifada vertikal skrolni qayta tiklash
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── 1) HTML/BODY: vertikal skroll har doim ishlasin ─── */
+html {
+  height: auto !important;
+  min-height: 100%;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  height: auto !important;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: auto;
+  touch-action: pan-y pan-x;
+  position: relative;
+}
+
+/* App container ham skrolni to'smasin */
+.app {
+  overflow: visible !important;
+  touch-action: pan-y;
+}
+
+.app-main {
+  overflow: visible !important;
+  touch-action: pan-y;
+}
+
+/* Pull-to-refresh indicator skrolni to'smasligi uchun pointer-events yo'q */
+.pull-refresh {
+  pointer-events: none !important;
+}
+
+/* ─── 2) IMAGE VIEWER — to'liq qora, hech narsa "leak" bo'lmasin ─── */
+.image-viewer {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-width: 100vw !important;
+  max-height: 100dvh !important;
+  background: #000 !important;
+  overflow: hidden !important;
+  z-index: 9999 !important;
+  isolation: isolate !important;
+  contain: layout paint size style !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  /* O'ng chetda hech narsa ko'rinmasligi uchun */
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.image-viewer.hidden {
+  display: none !important;
+}
+
+/* Image viewer ichidagi rasm — markazlashgan, fon esa to'liq qora */
+.image-viewer img {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+  margin: 0 auto !important;
+  background: #000 !important;
+}
+
+/* Image viewer ichidagi yopish tugmasi — yuqori o'ng burchakda */
+.image-viewer .viewer-close {
+  position: fixed !important;
+  top: calc(16px + var(--safe-top)) !important;
+  right: calc(16px + var(--safe-right, 0px)) !important;
+  z-index: 10000 !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+/* Video player ham xuddi shunday tarzda to'liq qora */
+.video-player {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-width: 100vw !important;
+  background: #000 !important;
+  overflow: hidden !important;
+  z-index: 9999 !important;
+  isolation: isolate !important;
+  contain: layout paint size style !important;
+}
+
+.video-player.hidden {
+  display: none !important;
+}
+
+/* ─── 3) Image-viewer ochilganda, ostidagi modallar bilan birga
+       butun fonni yashirish (ostidagi hech narsa "leak" qilmasin) ─── */
+body:has(.image-viewer:not(.hidden)) {
+  overflow: hidden !important;
+}
+
+body:has(.image-viewer:not(.hidden)) .app-header,
+body:has(.image-viewer:not(.hidden)) .bottom-nav,
+body:has(.image-viewer:not(.hidden)) .floating-tg,
+body:has(.image-viewer:not(.hidden)) .install-prompt,
+body:has(.image-viewer:not(.hidden)) #productModal,
+body:has(.image-viewer:not(.hidden)) #cartModal,
+body:has(.image-viewer:not(.hidden)) #collectionModal,
+body:has(.image-viewer:not(.hidden)) #sectionAllModal,
+body:has(.image-viewer:not(.hidden)) #newsModal {
+  visibility: hidden !important;
+}
+
+body:has(.video-player:not(.hidden)) {
+  overflow: hidden !important;
+}
+
+body:has(.video-player:not(.hidden)) .app-header,
+body:has(.video-player:not(.hidden)) .bottom-nav,
+body:has(.video-player:not(.hidden)) .floating-tg,
+body:has(.video-player:not(.hidden)) .install-prompt {
+  visibility: hidden !important;
+}
+
+/* Story-viewer ochilganda ham asosiy skrolni to'xtatish */
+body:has(.story-viewer:not(.hidden)) {
+  overflow: hidden !important;
+}
+
+/* Bottom-sheet ochilganda ham asosiy skrolni to'xtatish */
+body:has(.bottom-sheet:not(.hidden)) {
+  overflow: hidden !important;
+}
+
+/* ─── 4) Image-viewer va Video-player ichida har qanday
+       matn nodelarini yashirish (faqat img/video/svg ko'rinsin) ─── */
+.image-viewer > *:not(img):not(.viewer-close):not(button) {
+  display: none !important;
+}
+
+/* ─── 5) ANY ELEMENT — gorizontal toshib chiqishni butunlay to'xtatish ─── */
+* {
+  max-width: 100vw;
+}
+
+img, svg, video {
+  max-width: 100%;
+}
+
+/* SVG ichidagi elementlarga max-width chek bo'lmasligi kerak */
+svg * {
+  max-width: none !important;
+}
