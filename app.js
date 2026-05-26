@@ -46,7 +46,17 @@
     currentPage: 'home',
     currentStoryIndex: 0,
     storyTimer: null,
+    heroTimer: null,
+    heroIndex: 0,
+    heroProducts: [],
     searchFilters: { material: '', minLen: '', maxLen: '' },
+  };
+
+  // Section turi bo'yicha maksimal mahsulot soni (qolganlari "Hammasi" da)
+  const SECTION_LIMITS = {
+    grid: 10,      // 2 ustun x 5 qator = chiroyli
+    carousel: 8,   // gorizontal scroll, 8 ta yetarli
+    list: 12,      // vertikal ro'yxat, ko'proq joy bor
   };
 
   /* ───── 3. STORAGE ───── */
@@ -313,8 +323,14 @@
 
   const renderProductCard = (product) => {
     const liked = State.favorites.includes(product.id);
-    const sizes = [];
-    if (product.totalLength) sizes.push(formatSize(product.totalLength));
+    // Talab: model 27 emas, balki to'liq ma'lumotlar bilan ko'rsatish
+    const specsHTML = `
+      <div class="product-specs">
+        <div class="product-spec-mini"><span class="product-spec-mini-label">Model</span><span class="product-spec-mini-value">${escapeHTML(product.model || '—')}</span></div>
+        ${product.totalLength ? `<div class="product-spec-mini"><span class="product-spec-mini-label">Umumiy uz.</span><span class="product-spec-mini-value">${formatSize(product.totalLength)}</span></div>` : ''}
+        ${product.tubeLength ? `<div class="product-spec-mini"><span class="product-spec-mini-label">Truba uz.</span><span class="product-spec-mini-value">${formatSize(product.tubeLength)}</span></div>` : ''}
+        ${product.woodLength ? `<div class="product-spec-mini"><span class="product-spec-mini-label">Yog'och uz.</span><span class="product-spec-mini-value">${formatSize(product.woodLength)}</span></div>` : ''}
+      </div>`;
     return `
       <div class="product-card" data-product-id="${escapeHTML(product.id)}">
         <div class="product-img-wrap">
@@ -330,13 +346,13 @@
           </div>
         </div>
         <div class="product-info">
-          <div class="product-model">${escapeHTML(product.model || 'Model ' + product.id)}</div>
           <div class="product-meta">
-            ${product.surfaceNumber ? `<span class="product-meta-item">Y: ${escapeHTML(product.surfaceNumber)}</span>` : ''}
+            ${product.surfaceNumber ? `<span class="product-meta-item">Yuza: ${escapeHTML(product.surfaceNumber)}</span>` : ''}
             ${product.surfaceSize ? `<span class="product-meta-item">${escapeHTML(product.surfaceSize)}</span>` : ''}
           </div>
+          ${specsHTML}
           <div class="product-bottom">
-            <span class="product-size">${sizes.join(' • ') || '—'}</span>
+            <span class="product-size">#${escapeHTML(product.id)}</span>
             <div class="product-cart-wrap" data-cart-wrap="${escapeHTML(product.id)}">
               ${renderCartControl(product.id)}
             </div>
@@ -377,58 +393,128 @@
       }).join('');
       container.innerHTML = html;
       observeImages(container);
+      // Hero slayder ishga tushiriladi (DOM tayyor bo'lgach)
+      requestAnimationFrame(() => this.startHeroSlider && this.startHeroSlider());
     },
 
     renderHero(sec, products) {
-      const first = products[0];
-      if (!first) return '';
+      if (!products.length) return '';
+      // Hero endi BIR NECHTA mahsulotni ko'rsatadi (slider).
+      // 16:9 nisbatda, har 3 sekundda silliq almashinadi.
+      State.heroProducts = products;
+      const slides = products.map((p, i) => `
+        <div class="hero-slide ${i === 0 ? 'active' : ''}" data-hero-idx="${i}" data-product-id="${escapeHTML(p.id)}">
+          <img src="${escapeHTML(fixImageUrl(p.image))}" alt="${escapeHTML(p.model)}" loading="${i === 0 ? 'eager' : 'lazy'}"
+               onerror="this.src='${CONFIG.PLACEHOLDER_IMG}'" />
+          <div class="hero-overlay">
+            <div class="hero-title">${escapeHTML(p.model || sec.title)}</div>
+            <div class="hero-meta">
+              ${p.material ? `<span class="hero-badge">${escapeHTML(p.material)}</span>` : ''}
+              ${p.totalLength ? `<span class="hero-badge" style="background:rgba(255,255,255,0.25)">${formatSize(p.totalLength)}</span>` : ''}
+            </div>
+          </div>
+        </div>`).join('');
+      const dots = products.length > 1 ? `
+        <div class="hero-dots">
+          ${products.map((_, i) => `<button class="hero-dot ${i === 0 ? 'active' : ''}" data-hero-dot="${i}" aria-label="Slide ${i+1}"></button>`).join('')}
+        </div>` : '';
       return `
         <div class="section section-hero">
-          <div class="hero-card" data-product-id="${escapeHTML(first.id)}">
-            <img src="${escapeHTML(fixImageUrl(first.image))}" alt="${escapeHTML(first.model)}" loading="lazy" />
-            <div class="hero-overlay">
-              <div class="hero-title">${escapeHTML(sec.title || first.model)}</div>
-              <div class="hero-meta">
-                ${first.material ? `<span class="hero-badge">${escapeHTML(first.material)}</span>` : ''}
-                ${first.totalLength ? `<span class="hero-badge" style="background:rgba(255,255,255,0.25)">${formatSize(first.totalLength)}</span>` : ''}
-              </div>
-            </div>
+          <div class="hero-slider" id="heroSlider">
+            ${slides}
+            ${dots}
           </div>
         </div>`;
     },
 
+    // Hero auto-slider boshlash
+    startHeroSlider() {
+      clearInterval(State.heroTimer);
+      const slider = document.getElementById('heroSlider');
+      if (!slider) return;
+      const slides = slider.querySelectorAll('.hero-slide');
+      const dots = slider.querySelectorAll('.hero-dot');
+      if (slides.length < 2) return;
+
+      State.heroIndex = 0;
+      const showSlide = (idx) => {
+        State.heroIndex = (idx + slides.length) % slides.length;
+        slides.forEach((s, i) => s.classList.toggle('active', i === State.heroIndex));
+        dots.forEach((d, i) => d.classList.toggle('active', i === State.heroIndex));
+      };
+      // Dot click
+      dots.forEach(d => d.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showSlide(parseInt(d.dataset.heroDot, 10));
+        // Restart timer
+        clearInterval(State.heroTimer);
+        State.heroTimer = setInterval(() => showSlide(State.heroIndex + 1), 3000);
+      }));
+      // Swipe support
+      let startX = 0;
+      slider.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+      slider.addEventListener('touchend', (e) => {
+        const diff = (e.changedTouches[0]?.clientX || 0) - startX;
+        if (Math.abs(diff) > 50) {
+          showSlide(State.heroIndex + (diff < 0 ? 1 : -1));
+          clearInterval(State.heroTimer);
+          State.heroTimer = setInterval(() => showSlide(State.heroIndex + 1), 3000);
+        }
+      }, { passive: true });
+      // 3 sekund interval (talab)
+      State.heroTimer = setInterval(() => showSlide(State.heroIndex + 1), 3000);
+    },
+
+    // Section header + "Hammasi" tugmasi
+    headerHTML(sec, total, shown) {
+      const showAll = total > shown;
+      const action = showAll
+        ? `<button class="section-action-btn" data-show-all="${escapeHTML(sec.title)}">Barchasi (${total})
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+           </button>`
+        : '';
+      return `
+        <div class="section-header">
+          <h2 class="section-title">${escapeHTML(sec.title)}</h2>
+          ${action}
+        </div>`;
+    },
+
     renderCarousel(sec, products) {
+      const total = products.length;
+      const limit = SECTION_LIMITS.carousel;
+      const visible = products.slice(0, limit);
       return `
         <div class="section">
-          <div class="section-header">
-            <h2 class="section-title">${escapeHTML(sec.title)}</h2>
-          </div>
+          ${this.headerHTML(sec, total, limit)}
           <div class="carousel-scroll">
-            ${products.map(renderProductCard).join('')}
+            ${visible.map(renderProductCard).join('')}
           </div>
         </div>`;
     },
 
     renderGrid(sec, products) {
+      const total = products.length;
+      const limit = SECTION_LIMITS.grid;
+      const visible = products.slice(0, limit);
       return `
         <div class="section">
-          <div class="section-header">
-            <h2 class="section-title">${escapeHTML(sec.title)}</h2>
-          </div>
+          ${this.headerHTML(sec, total, limit)}
           <div class="grid-2">
-            ${products.map(renderProductCard).join('')}
+            ${visible.map(renderProductCard).join('')}
           </div>
         </div>`;
     },
 
     renderList(sec, products) {
+      const total = products.length;
+      const limit = SECTION_LIMITS.list;
+      const visible = products.slice(0, limit);
       return `
         <div class="section">
-          <div class="section-header">
-            <h2 class="section-title">${escapeHTML(sec.title)}</h2>
-          </div>
+          ${this.headerHTML(sec, total, limit)}
           <div class="list-vertical">
-            ${products.map(p => `
+            ${visible.map(p => `
               <div class="list-card" data-product-id="${escapeHTML(p.id)}">
                 <div class="list-card-img">${lazyImg(p.image, p.model)}</div>
                 <div class="list-card-info">
@@ -441,6 +527,23 @@
               </div>`).join('')}
           </div>
         </div>`;
+    },
+  };
+
+  /* ───── 7b. ALL PRODUCTS MODAL ("Hammasi" tugmasi) ───── */
+  const AllProducts = {
+    open(sectionTitle) {
+      const sec = State.sections.find(s => s.title === sectionTitle);
+      if (!sec) return;
+      const products = sec.ids.map(findProduct).filter(Boolean);
+      $('#allProductsTitle').textContent = sec.title + ` (${products.length})`;
+      $('#allProductsBody').innerHTML = `
+        <div class="grid-2">
+          ${products.map(renderProductCard).join('')}
+        </div>`;
+      $('#allProductsModal').classList.remove('hidden');
+      HistoryManager.push(() => $('#allProductsModal').classList.add('hidden'), 'allProducts');
+      observeImages($('#allProductsBody'));
     },
   };
   /* ───── 8. STORIES ───── */
@@ -771,9 +874,16 @@
     count() { return State.cart.reduce((sum, i) => sum + i.qty, 0); },
     updateBadge(animate = false) {
       const badge = $('#cartBadge');
+      if (!badge) return;
       const c = this.count();
       badge.textContent = c;
-      badge.style.display = c > 0 ? 'flex' : 'none';
+      if (c > 0) {
+        badge.style.display = 'flex';
+        badge.removeAttribute('data-empty');
+      } else {
+        badge.style.display = 'none';
+        badge.setAttribute('data-empty', '');
+      }
       if (animate) {
         badge.classList.remove('bump');
         void badge.offsetWidth;
@@ -1167,6 +1277,10 @@
       }
       const productEl = e.target.closest('[data-product-id]');
       if (productEl) {
+        // Hero slide click — only the ACTIVE slide is interactive (faqat ko'rinayotgani)
+        if (productEl.classList.contains('hero-slide') && !productEl.classList.contains('active')) {
+          return;
+        }
         ProductDetail.open(productEl.dataset.productId);
         return;
       }
@@ -1183,8 +1297,19 @@
       }
     });
 
-    $('#searchBtn').addEventListener('click', () => Navigation.goTo('search'));
-    $('#cartBtn').addEventListener('click', () => Cart.open());
+    // Header-dagi Savatcha tugmasi (qidiruv o'rnida) — ALMASHTIRILDI
+    $('#cartBtn')?.addEventListener('click', () => Cart.open());
+    // Bottom nav markazidagi tugma — endi QIDIRUV (search o'rnida edi)
+    // (Navigation.bind() data-page="search" ni qaytaradi, qo'shimcha kerakmas)
+
+    // Show all (Hammasi) tugmasi
+    document.addEventListener('click', (e) => {
+      const showAllBtn = e.target.closest('[data-show-all]');
+      if (showAllBtn) {
+        e.stopPropagation();
+        AllProducts.open(showAllBtn.dataset.showAll);
+      }
+    });
     $('#notifBtn').addEventListener('click', () => News.open());
     $('#checkoutBtn').addEventListener('click', () => Cart.checkout());
 

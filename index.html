@@ -12,10 +12,10 @@
   <title>Kapgir Premium — Oshxona anjomlari</title>
 
   <!-- PWA Manifest -->
-  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Kapgir%20Premium%22%2C%22short_name%22%3A%22Kapgir%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230a0a0f%22%2C%22theme_color%22%3A%22%230a0a0f%22%2C%22orientation%22%3A%22portrait%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fapi.iconify.design%2Fmaterial-symbols%3Akitchen.svg%3Fcolor%3D%2523ff6b35%26width%3D192%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fapi.iconify.design%2Fmaterial-symbols%3Akitchen.svg%3Fcolor%3D%2523ff6b35%26width%3D512%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Kapgir%20Premium%22%2C%22short_name%22%3A%22Kapgir%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230a0a0f%22%2C%22theme_color%22%3A%22%230a0a0f%22%2C%22orientation%22%3A%22portrait%22%7D" />
 
   <!-- Apple Touch Icon -->
-  <link rel="apple-touch-icon" href="https://api.iconify.design/material-symbols:kitchen.svg?color=%23ff6b35&width=180" />
+  <link rel="apple-touch-icon" href="https://api.iconify.design/game-icons:ladle.svg?color=%23ff6b35&width=180" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -28,12 +28,41 @@
 <body>
 
   <!-- ═══════════════════════════════════════════════════
+       KAPGIR LOGO SVG (reusable symbol — kapgir = skimmer/ladle)
+  ═══════════════════════════════════════════════════ -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="kapgir-logo" viewBox="0 0 64 64">
+        <!-- Handle -->
+        <rect x="42" y="6" width="6" height="28" rx="3" fill="currentColor" opacity="0.95"/>
+        <!-- Ring connector -->
+        <circle cx="45" cy="36" r="3.5" fill="currentColor" opacity="0.95"/>
+        <!-- Skimmer bowl outline -->
+        <ellipse cx="26" cy="44" rx="20" ry="14" fill="currentColor" opacity="0.95"/>
+        <!-- Holes pattern (kapgir = perforated skimmer) -->
+        <circle cx="18" cy="40" r="2" fill="#0a0a0f"/>
+        <circle cx="26" cy="38" r="2" fill="#0a0a0f"/>
+        <circle cx="34" cy="40" r="2" fill="#0a0a0f"/>
+        <circle cx="14" cy="46" r="2" fill="#0a0a0f"/>
+        <circle cx="22" cy="46" r="2" fill="#0a0a0f"/>
+        <circle cx="30" cy="46" r="2" fill="#0a0a0f"/>
+        <circle cx="38" cy="46" r="2" fill="#0a0a0f"/>
+        <circle cx="18" cy="52" r="2" fill="#0a0a0f"/>
+        <circle cx="26" cy="52" r="2" fill="#0a0a0f"/>
+        <circle cx="34" cy="52" r="2" fill="#0a0a0f"/>
+        <!-- Connection from handle to bowl -->
+        <path d="M42 34 L40 38" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ═══════════════════════════════════════════════════
        SPLASH SCREEN
   ═══════════════════════════════════════════════════ -->
   <div id="splash" class="splash">
     <div class="splash-content">
       <div class="splash-logo">
-        <div class="splash-logo-icon">🍳</div>
+        <svg class="splash-logo-svg" viewBox="0 0 64 64"><use href="#kapgir-logo"/></svg>
       </div>
       <h1 class="splash-title">KAPGIR</h1>
       <p class="splash-subtitle">PREMIUM</p>
@@ -82,23 +111,23 @@
     <header class="app-header">
       <div class="header-inner">
         <div class="header-logo">
-          <div class="logo-icon">🍳</div>
+          <div class="logo-icon">
+            <svg viewBox="0 0 64 64"><use href="#kapgir-logo"/></svg>
+          </div>
           <div class="logo-text">
             <span class="logo-name">Kapgir</span>
             <span class="logo-tag">PREMIUM</span>
           </div>
         </div>
         <div class="header-actions">
-          <button class="header-btn" id="searchBtn" aria-label="Qidiruv">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <!-- ALMASHTIRILDI: Savatcha endi header-da (oldingi qidiruv o'rnida) -->
+          <button class="header-btn cart-btn" id="cartBtn" aria-label="Savatcha">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+            <span class="cart-badge" id="cartBadge">0</span>
           </button>
           <button class="header-btn" id="notifBtn" aria-label="Bildirishnomalar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
             <span class="notif-dot"></span>
-          </button>
-          <button class="header-btn cart-btn" id="cartBtn" aria-label="Savatcha">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-            <span class="cart-badge" id="cartBadge">0</span>
           </button>
         </div>
       </div>
@@ -114,7 +143,6 @@
         <!-- Stories container -->
         <div class="stories-wrap">
           <div class="stories-scroll" id="storiesContainer">
-            <!-- Stories dynamically loaded -->
             <div class="story-skeleton-wrap">
               <div class="story-skeleton"></div>
               <div class="story-skeleton"></div>
@@ -257,7 +285,7 @@
 
         <div class="profile-footer">
           <p>Kapgir Premium © 2025</p>
-          <p class="version">v1.0.0</p>
+          <p class="version">v2.0.0</p>
         </div>
       </section>
 
@@ -272,6 +300,8 @@
 
     <!-- ┌─────────────────────────────────────────────┐
          │  BOTTOM NAVIGATION                          │
+         │  Markaziy tugma endi QIDIRUV (oldingi joyda  │
+         │  savatcha bor edi — almashtirildi)          │
          └─────────────────────────────────────────────┘ -->
     <nav class="bottom-nav">
       <button class="nav-item active" data-page="home">
@@ -282,6 +312,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
         <span>To'plamlar</span>
       </button>
+      <!-- ALMASHTIRILDI: markazda endi QIDIRUV -->
       <button class="nav-item nav-center" data-page="search">
         <div class="nav-center-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -370,6 +401,21 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
       <div id="collectionBody"></div>
+    </div>
+  </div>
+
+  <!-- All Products Modal (YANGI: "Hammasi" tugmasi orqali ochiladi) -->
+  <div id="allProductsModal" class="bottom-sheet hidden">
+    <div class="sheet-overlay" data-close></div>
+    <div class="sheet-content tall">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <h2 id="allProductsTitle">Barchasi</h2>
+        <button class="sheet-close" data-close>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="allProductsBody"></div>
     </div>
   </div>
 
