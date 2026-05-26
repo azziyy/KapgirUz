@@ -29,7 +29,12 @@
       CACHE: 'kapgir_cache_',
     },
     STORY_DURATION: 5000,
-    PLACEHOLDER_IMG: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect fill="%231a1a25" width="400" height="400"/><text x="50%25" y="50%25" font-size="48" text-anchor="middle" dy=".3em" fill="%234a4a5c">🍳</text></svg>',
+    PLACEHOLDER_IMG: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect fill="%231a1a25" width="400" height="400"/><g transform="translate(140 130) scale(2.2)"><rect x="36" y="4" width="6" height="30" rx="3" fill="%23ff6b35" transform="rotate(28 39 19)"/><circle cx="24" cy="42" r="18" fill="%23ff6b35"/><circle cx="16" cy="36" r="2" fill="%231a1a25"/><circle cx="24" cy="33" r="2" fill="%231a1a25"/><circle cx="32" cy="36" r="2" fill="%231a1a25"/><circle cx="13" cy="44" r="2" fill="%231a1a25"/><circle cx="24" cy="42" r="2" fill="%231a1a25"/><circle cx="35" cy="44" r="2" fill="%231a1a25"/><circle cx="16" cy="50" r="2" fill="%231a1a25"/><circle cx="24" cy="52" r="2" fill="%231a1a25"/><circle cx="32" cy="50" r="2" fill="%231a1a25"/></g></svg>',
+    // Section item limit before "Barchasi" button
+    SECTION_LIMITS: { grid: 10, carousel: 10, list: 8, hero: 99 },
+    // Product card image auto-rotate interval (ms)
+    CARD_ROTATE_MS: 3000,
+    HERO_ROTATE_MS: 4500,
   };
 
   /* ───── 2. STATE ───── */
@@ -46,17 +51,20 @@
     currentPage: 'home',
     currentStoryIndex: 0,
     storyTimer: null,
-    heroTimer: null,
-    heroIndex: 0,
-    heroProducts: [],
     searchFilters: { material: '', minLen: '', maxLen: '' },
+    // Active intervals for card slideshows & hero rotation (cleared on re-render)
+    intervals: [],
   };
 
-  // Section turi bo'yicha maksimal mahsulot soni (qolganlari "Hammasi" da)
-  const SECTION_LIMITS = {
-    grid: 10,      // 2 ustun x 5 qator = chiroyli
-    carousel: 8,   // gorizontal scroll, 8 ta yetarli
-    list: 12,      // vertikal ro'yxat, ko'proq joy bor
+  // Helper to manage intervals so we can clear them on re-render
+  const clearIntervals = () => {
+    State.intervals.forEach(id => clearInterval(id));
+    State.intervals = [];
+  };
+  const addInterval = (fn, ms) => {
+    const id = setInterval(fn, ms);
+    State.intervals.push(id);
+    return id;
   };
 
   /* ───── 3. STORAGE ───── */
@@ -321,20 +329,29 @@
       </button>`;
   };
 
+  // Multi-image slideshow for product card (3 images auto-rotate)
+  const renderCardImages = (product) => {
+    const imgs = (product.images && product.images.length) ? product.images : [product.image].filter(Boolean);
+    if (imgs.length <= 1) {
+      return lazyImg(imgs[0] || '', product.model);
+    }
+    return imgs.map((img, i) => `
+      <img class="product-img card-slide-img ${i === 0 ? 'active' : ''}"
+           data-src="${escapeHTML(fixImageUrl(img))}"
+           alt="${escapeHTML(product.model)}" loading="lazy" />
+    `).join('') + `<div class="product-img-skeleton"></div>
+    <div class="card-slide-dots">
+      ${imgs.map((_, i) => `<span class="card-slide-dot ${i === 0 ? 'active' : ''}"></span>`).join('')}
+    </div>`;
+  };
+
   const renderProductCard = (product) => {
     const liked = State.favorites.includes(product.id);
-    // Talab: model 27 emas, balki to'liq ma'lumotlar bilan ko'rsatish
-    const specsHTML = `
-      <div class="product-specs">
-        <div class="product-spec-mini"><span class="product-spec-mini-label">Model</span><span class="product-spec-mini-value">${escapeHTML(product.model || '—')}</span></div>
-        ${product.totalLength ? `<div class="product-spec-mini"><span class="product-spec-mini-label">Umumiy uz.</span><span class="product-spec-mini-value">${formatSize(product.totalLength)}</span></div>` : ''}
-        ${product.tubeLength ? `<div class="product-spec-mini"><span class="product-spec-mini-label">Truba uz.</span><span class="product-spec-mini-value">${formatSize(product.tubeLength)}</span></div>` : ''}
-        ${product.woodLength ? `<div class="product-spec-mini"><span class="product-spec-mini-label">Yog'och uz.</span><span class="product-spec-mini-value">${formatSize(product.woodLength)}</span></div>` : ''}
-      </div>`;
+    const hasMulti = (product.images && product.images.length > 1);
     return `
       <div class="product-card" data-product-id="${escapeHTML(product.id)}">
-        <div class="product-img-wrap">
-          ${lazyImg(product.image, product.model)}
+        <div class="product-img-wrap ${hasMulti ? 'has-slideshow' : ''}">
+          ${renderCardImages(product)}
           <div class="product-badges">
             ${product.material ? `<span class="badge badge-material">${escapeHTML(product.material)}</span>` : ''}
             ${product.video ? `<span class="badge badge-video"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>Video</span>` : ''}
@@ -346,19 +363,54 @@
           </div>
         </div>
         <div class="product-info">
-          <div class="product-meta">
-            ${product.surfaceNumber ? `<span class="product-meta-item">Yuza: ${escapeHTML(product.surfaceNumber)}</span>` : ''}
-            ${product.surfaceSize ? `<span class="product-meta-item">${escapeHTML(product.surfaceSize)}</span>` : ''}
+          <div class="product-model">Model ${escapeHTML(product.model || product.id)}</div>
+          <div class="product-specs-mini">
+            ${product.totalLength ? `<div class="spec-mini"><span class="spec-mini-label">Umumiy</span><span class="spec-mini-value">${formatSize(product.totalLength)}</span></div>` : ''}
+            ${product.tubeLength ? `<div class="spec-mini"><span class="spec-mini-label">Truba</span><span class="spec-mini-value">${formatSize(product.tubeLength)}</span></div>` : ''}
+            ${product.woodLength ? `<div class="spec-mini"><span class="spec-mini-label">Yog'och</span><span class="spec-mini-value">${formatSize(product.woodLength)}</span></div>` : ''}
+            ${product.surfaceNumber ? `<div class="spec-mini"><span class="spec-mini-label">Yuza</span><span class="spec-mini-value">№ ${escapeHTML(product.surfaceNumber)}${product.surfaceSize ? ' • ' + escapeHTML(product.surfaceSize) : ''}</span></div>` : ''}
           </div>
-          ${specsHTML}
           <div class="product-bottom">
-            <span class="product-size">#${escapeHTML(product.id)}</span>
+            ${product.material ? `<span class="product-material-mini">${escapeHTML(product.material)}</span>` : '<span></span>'}
             <div class="product-cart-wrap" data-cart-wrap="${escapeHTML(product.id)}">
               ${renderCartControl(product.id)}
             </div>
           </div>
         </div>
       </div>`;
+  };
+
+  // Start auto-rotation for all card slideshows inside container
+  const startCardSlideshows = (root = document) => {
+    root.querySelectorAll('.product-img-wrap.has-slideshow').forEach(wrap => {
+      if (wrap.dataset.slideshowStarted === '1') return;
+      const imgs = Array.from(wrap.querySelectorAll('.card-slide-img'));
+      const dots = Array.from(wrap.querySelectorAll('.card-slide-dot'));
+      if (imgs.length <= 1) return;
+      let idx = 0;
+      // Pre-load all images so transitions are smooth
+      imgs.forEach(img => {
+        const src = img.dataset.src;
+        if (src && !img.src) {
+          const tmp = new Image();
+          tmp.onload = () => { img.src = src; img.classList.add('loaded'); };
+          tmp.onerror = () => { img.src = CONFIG.PLACEHOLDER_IMG; img.classList.add('loaded'); };
+          tmp.src = src;
+        }
+      });
+      // Hide initial skeleton when first image loaded
+      const skel = wrap.querySelector('.product-img-skeleton');
+      if (skel) setTimeout(() => { skel.style.display = 'none'; }, 600);
+      wrap.dataset.slideshowStarted = '1';
+      addInterval(() => {
+        const prev = idx;
+        idx = (idx + 1) % imgs.length;
+        imgs[prev].classList.remove('active');
+        imgs[idx].classList.add('active');
+        if (dots[prev]) dots[prev].classList.remove('active');
+        if (dots[idx]) dots[idx].classList.add('active');
+      }, CONFIG.CARD_ROTATE_MS);
+    });
   };
 
   // Update all cart controls for a given product across DOM
@@ -368,8 +420,25 @@
     });
   };
   /* ───── 7. SECTIONS ───── */
+  // Store sections data by section index for the "See all" modal
+  const SectionStore = {};
+
+  const sectionHeader = (sec, totalCount, shownCount, secKey) => {
+    const hasMore = totalCount > shownCount;
+    return `
+      <div class="section-header">
+        <h2 class="section-title">${escapeHTML(sec.title)}</h2>
+        ${hasMore ? `<button class="section-see-all" data-see-all="${escapeHTML(secKey)}">
+          Barchasi (${totalCount})
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+        </button>` : ''}
+      </div>`;
+  };
+
   const Sections = {
     render() {
+      // Clear existing intervals so we don't accumulate
+      clearIntervals();
       const container = $('#dynamicSections');
       if (!State.sections.length) {
         container.innerHTML = `
@@ -380,171 +449,159 @@
           </div>`;
         return;
       }
-      const html = State.sections.map(sec => {
+      const html = State.sections.map((sec, secIdx) => {
         const products = sec.ids.map(findProduct).filter(Boolean);
         if (!products.length && sec.type !== 'hero') return '';
+        const secKey = 'sec_' + secIdx;
+        SectionStore[secKey] = { sec, products };
+        const limit = CONFIG.SECTION_LIMITS[sec.type] || 10;
+        const shown = products.slice(0, limit);
         switch (sec.type) {
-          case 'hero':     return this.renderHero(sec, products);
-          case 'carousel': return this.renderCarousel(sec, products);
-          case 'grid':     return this.renderGrid(sec, products);
-          case 'list':     return this.renderList(sec, products);
-          default:         return this.renderGrid(sec, products);
+          case 'hero':     return this.renderHero(sec, products, secKey);
+          case 'carousel': return this.renderCarousel(sec, shown, products.length, secKey);
+          case 'grid':     return this.renderGrid(sec, shown, products.length, secKey);
+          case 'list':     return this.renderList(sec, shown, products.length, secKey);
+          default:         return this.renderGrid(sec, shown, products.length, secKey);
         }
       }).join('');
       container.innerHTML = html;
       observeImages(container);
-      // Hero slayder ishga tushiriladi (DOM tayyor bo'lgach)
-      requestAnimationFrame(() => this.startHeroSlider && this.startHeroSlider());
+      startCardSlideshows(container);
+      startHeroRotations(container);
     },
 
-    renderHero(sec, products) {
+    renderHero(sec, products, secKey) {
       if (!products.length) return '';
-      // Hero endi BIR NECHTA mahsulotni ko'rsatadi (slider).
-      // 16:9 nisbatda, har 3 sekundda silliq almashinadi.
-      State.heroProducts = products;
-      const slides = products.map((p, i) => `
-        <div class="hero-slide ${i === 0 ? 'active' : ''}" data-hero-idx="${i}" data-product-id="${escapeHTML(p.id)}">
-          <img src="${escapeHTML(fixImageUrl(p.image))}" alt="${escapeHTML(p.model)}" loading="${i === 0 ? 'eager' : 'lazy'}"
-               onerror="this.src='${CONFIG.PLACEHOLDER_IMG}'" />
-          <div class="hero-overlay">
-            <div class="hero-title">${escapeHTML(p.model || sec.title)}</div>
-            <div class="hero-meta">
-              ${p.material ? `<span class="hero-badge">${escapeHTML(p.material)}</span>` : ''}
-              ${p.totalLength ? `<span class="hero-badge" style="background:rgba(255,255,255,0.25)">${formatSize(p.totalLength)}</span>` : ''}
-            </div>
-          </div>
-        </div>`).join('');
-      const dots = products.length > 1 ? `
-        <div class="hero-dots">
-          ${products.map((_, i) => `<button class="hero-dot ${i === 0 ? 'active' : ''}" data-hero-dot="${i}" aria-label="Slide ${i+1}"></button>`).join('')}
-        </div>` : '';
       return `
         <div class="section section-hero">
-          <div class="hero-slider" id="heroSlider">
-            ${slides}
-            ${dots}
+          <div class="hero-carousel" data-hero="${escapeHTML(secKey)}">
+            <div class="hero-track">
+              ${products.map((p, i) => `
+                <div class="hero-slide ${i === 0 ? 'active' : ''}" data-hero-idx="${i}" data-product-id="${escapeHTML(p.id)}">
+                  <img src="${escapeHTML(fixImageUrl(p.image))}" alt="${escapeHTML(p.model)}" loading="lazy" />
+                  <div class="hero-overlay">
+                    <div class="hero-title">${escapeHTML(sec.title || ('Model ' + p.model))}</div>
+                    <div class="hero-sub">Model ${escapeHTML(p.model)}</div>
+                    <div class="hero-meta">
+                      ${p.material ? `<span class="hero-badge">${escapeHTML(p.material)}</span>` : ''}
+                      ${p.totalLength ? `<span class="hero-badge soft">${formatSize(p.totalLength)}</span>` : ''}
+                    </div>
+                  </div>
+                </div>`).join('')}
+            </div>
+            ${products.length > 1 ? `
+              <div class="hero-dots">
+                ${products.map((_, i) => `<button class="hero-dot ${i===0?'active':''}" data-hero-dot="${i}" aria-label="Slayd ${i+1}"></button>`).join('')}
+              </div>` : ''}
           </div>
         </div>`;
     },
 
-    // Hero auto-slider boshlash
-    startHeroSlider() {
-      clearInterval(State.heroTimer);
-      const slider = document.getElementById('heroSlider');
-      if (!slider) return;
-      const slides = slider.querySelectorAll('.hero-slide');
-      const dots = slider.querySelectorAll('.hero-dot');
-      if (slides.length < 2) return;
-
-      State.heroIndex = 0;
-      const showSlide = (idx) => {
-        State.heroIndex = (idx + slides.length) % slides.length;
-        slides.forEach((s, i) => s.classList.toggle('active', i === State.heroIndex));
-        dots.forEach((d, i) => d.classList.toggle('active', i === State.heroIndex));
-      };
-      // Dot click
-      dots.forEach(d => d.addEventListener('click', (e) => {
-        e.stopPropagation();
-        showSlide(parseInt(d.dataset.heroDot, 10));
-        // Restart timer
-        clearInterval(State.heroTimer);
-        State.heroTimer = setInterval(() => showSlide(State.heroIndex + 1), 3000);
-      }));
-      // Swipe support
-      let startX = 0;
-      slider.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
-      slider.addEventListener('touchend', (e) => {
-        const diff = (e.changedTouches[0]?.clientX || 0) - startX;
-        if (Math.abs(diff) > 50) {
-          showSlide(State.heroIndex + (diff < 0 ? 1 : -1));
-          clearInterval(State.heroTimer);
-          State.heroTimer = setInterval(() => showSlide(State.heroIndex + 1), 3000);
-        }
-      }, { passive: true });
-      // 3 sekund interval (talab)
-      State.heroTimer = setInterval(() => showSlide(State.heroIndex + 1), 3000);
-    },
-
-    // Section header + "Hammasi" tugmasi
-    headerHTML(sec, total, shown) {
-      const showAll = total > shown;
-      const action = showAll
-        ? `<button class="section-action-btn" data-show-all="${escapeHTML(sec.title)}">Barchasi (${total})
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-           </button>`
-        : '';
-      return `
-        <div class="section-header">
-          <h2 class="section-title">${escapeHTML(sec.title)}</h2>
-          ${action}
-        </div>`;
-    },
-
-    renderCarousel(sec, products) {
-      const total = products.length;
-      const limit = SECTION_LIMITS.carousel;
-      const visible = products.slice(0, limit);
+    renderCarousel(sec, products, total, secKey) {
       return `
         <div class="section">
-          ${this.headerHTML(sec, total, limit)}
+          ${sectionHeader(sec, total, products.length, secKey)}
           <div class="carousel-scroll">
-            ${visible.map(renderProductCard).join('')}
+            ${products.map(renderProductCard).join('')}
           </div>
         </div>`;
     },
 
-    renderGrid(sec, products) {
-      const total = products.length;
-      const limit = SECTION_LIMITS.grid;
-      const visible = products.slice(0, limit);
+    renderGrid(sec, products, total, secKey) {
       return `
         <div class="section">
-          ${this.headerHTML(sec, total, limit)}
+          ${sectionHeader(sec, total, products.length, secKey)}
           <div class="grid-2">
-            ${visible.map(renderProductCard).join('')}
+            ${products.map(renderProductCard).join('')}
           </div>
         </div>`;
     },
 
-    renderList(sec, products) {
-      const total = products.length;
-      const limit = SECTION_LIMITS.list;
-      const visible = products.slice(0, limit);
+    renderList(sec, products, total, secKey) {
       return `
         <div class="section">
-          ${this.headerHTML(sec, total, limit)}
+          ${sectionHeader(sec, total, products.length, secKey)}
           <div class="list-vertical">
-            ${visible.map(p => `
+            ${products.map(p => `
               <div class="list-card" data-product-id="${escapeHTML(p.id)}">
                 <div class="list-card-img">${lazyImg(p.image, p.model)}</div>
                 <div class="list-card-info">
-                  <div>
-                    <div class="list-card-title">${escapeHTML(p.model)}</div>
-                    <div class="list-card-meta">${escapeHTML(p.material)} • ${formatSize(p.totalLength)}</div>
+                  <div class="list-card-title">Model ${escapeHTML(p.model)}</div>
+                  <div class="list-card-meta">${p.material ? escapeHTML(p.material) + ' • ' : ''}${formatSize(p.totalLength)}</div>
+                  <div class="list-card-specs">
+                    ${p.tubeLength ? `<span>Truba: ${formatSize(p.tubeLength)}</span>` : ''}
+                    ${p.woodLength ? `<span>Yog'och: ${formatSize(p.woodLength)}</span>` : ''}
+                    ${p.surfaceNumber ? `<span>Yuza: №${escapeHTML(p.surfaceNumber)}</span>` : ''}
                   </div>
-                  <div class="list-card-meta">Y: ${escapeHTML(p.surfaceNumber || '—')} ${p.surfaceSize ? '• ' + escapeHTML(p.surfaceSize) : ''}</div>
                 </div>
               </div>`).join('')}
           </div>
         </div>`;
     },
-  };
 
-  /* ───── 7b. ALL PRODUCTS MODAL ("Hammasi" tugmasi) ───── */
-  const AllProducts = {
-    open(sectionTitle) {
-      const sec = State.sections.find(s => s.title === sectionTitle);
-      if (!sec) return;
-      const products = sec.ids.map(findProduct).filter(Boolean);
-      $('#allProductsTitle').textContent = sec.title + ` (${products.length})`;
-      $('#allProductsBody').innerHTML = `
-        <div class="grid-2">
+    openAll(secKey) {
+      const entry = SectionStore[secKey];
+      if (!entry) return;
+      const { sec, products } = entry;
+      $('#sectionAllTitle').textContent = sec.title || 'Barchasi';
+      $('#sectionAllBody').innerHTML = `
+        <div class="grid-2" style="padding:16px">
           ${products.map(renderProductCard).join('')}
         </div>`;
-      $('#allProductsModal').classList.remove('hidden');
-      HistoryManager.push(() => $('#allProductsModal').classList.add('hidden'), 'allProducts');
-      observeImages($('#allProductsBody'));
+      openSheet('#sectionAllModal', 'sectionAll');
+      observeImages($('#sectionAllBody'));
+      startCardSlideshows($('#sectionAllBody'));
     },
+  };
+
+  // Hero auto-rotation (16:9)
+  const startHeroRotations = (root = document) => {
+    root.querySelectorAll('.hero-carousel').forEach(carousel => {
+      const slides = Array.from(carousel.querySelectorAll('.hero-slide'));
+      const dots = Array.from(carousel.querySelectorAll('.hero-dot'));
+      if (slides.length <= 1) return;
+      let idx = 0;
+      const goTo = (i) => {
+        slides[idx].classList.remove('active');
+        if (dots[idx]) dots[idx].classList.remove('active');
+        idx = (i + slides.length) % slides.length;
+        slides[idx].classList.add('active');
+        if (dots[idx]) dots[idx].classList.add('active');
+      };
+      dots.forEach((d, i) => d.addEventListener('click', (e) => {
+        e.stopPropagation();
+        goTo(i);
+      }));
+      // Touch swipe
+      let startX = 0;
+      carousel.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+      carousel.addEventListener('touchend', (e) => {
+        const diff = (e.changedTouches[0]?.clientX || 0) - startX;
+        if (Math.abs(diff) > 50) goTo(idx + (diff < 0 ? 1 : -1));
+      }, { passive: true });
+      addInterval(() => goTo(idx + 1), CONFIG.HERO_ROTATE_MS);
+    });
+  };
+
+  /* ───── Sheet open helper (fix animation glitches) ───── */
+  const openSheet = (selector, name) => {
+    const m = (typeof selector === 'string') ? $(selector) : selector;
+    if (!m) return;
+    // Make sure animations restart properly: temporarily remove animation,
+    // force reflow, then re-enable. Avoids the “instant-then-replay” glitch.
+    const content = m.querySelector('.sheet-content');
+    m.classList.remove('hidden');
+    if (content) {
+      content.style.animation = 'none';
+      // eslint-disable-next-line no-unused-expressions
+      content.offsetHeight;
+      content.style.animation = '';
+    }
+    m.style.animation = 'none';
+    // eslint-disable-next-line no-unused-expressions
+    m.offsetHeight;
+    m.style.animation = '';
+    HistoryManager.push(() => m.classList.add('hidden'), name || 'sheet');
   };
   /* ───── 8. STORIES ───── */
   const Stories = {
@@ -598,7 +655,13 @@
           <div class="story-progress-fill ${i < idx ? 'done' : ''} ${i === idx ? 'active' : ''}"></div>
         </div>`).join('');
 
-      const tapToOpen = story.productId ? `<button class="story-cta" data-story-open-product="${escapeHTML(story.productId)}">Mahsulotni ko'rish →</button>` : '';
+      const tapToOpen = story.productId
+        ? `<button class="story-cta" data-story-open-product="${escapeHTML(story.productId)}">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+             Mahsulotni ko'rish
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+           </button>`
+        : '';
       $('#storyContent').innerHTML = `
         <div class="story-title-bar">${escapeHTML(story.title)}</div>
         <img src="${escapeHTML(fixImageUrl(story.image))}" alt="${escapeHTML(story.title)}"
@@ -678,9 +741,8 @@
 
     open(col) {
       const products = col.ids.map(findProduct).filter(Boolean);
-      HistoryManager.push(() => $('#collectionModal').classList.add('hidden'), 'collection');
       $('#collectionBody').innerHTML = `
-        <div class="product-detail-image" style="aspect-ratio:16/9">
+        <div class="product-detail-image collection-cover">
           <img src="${escapeHTML(fixImageUrl(col.image))}" alt="${escapeHTML(col.name)}"
                onerror="this.src='${CONFIG.PLACEHOLDER_IMG}'" />
         </div>
@@ -691,8 +753,9 @@
             ${products.map(renderProductCard).join('')}
           </div>
         </div>`;
-      $('#collectionModal').classList.remove('hidden');
+      openSheet('#collectionModal', 'collection');
       observeImages($('#collectionBody'));
+      startCardSlideshows($('#collectionBody'));
     },
   };
   /* ───── 10. SEARCH + FILTERS ───── */
@@ -877,13 +940,7 @@
       if (!badge) return;
       const c = this.count();
       badge.textContent = c;
-      if (c > 0) {
-        badge.style.display = 'flex';
-        badge.removeAttribute('data-empty');
-      } else {
-        badge.style.display = 'none';
-        badge.setAttribute('data-empty', '');
-      }
+      badge.style.display = c > 0 ? 'flex' : 'none';
       if (animate) {
         badge.classList.remove('bump');
         void badge.offsetWidth;
@@ -892,8 +949,7 @@
     },
     open() {
       this.renderModal();
-      $('#cartModal').classList.remove('hidden');
-      HistoryManager.push(() => $('#cartModal').classList.add('hidden'), 'cart');
+      openSheet('#cartModal', 'cart');
     },
     renderModal() {
       const body = $('#cartBody');
@@ -1086,8 +1142,7 @@
         });
       }
 
-      $('#productModal').classList.remove('hidden');
-      HistoryManager.push(() => $('#productModal').classList.add('hidden'), 'product');
+      openSheet('#productModal', 'product');
     },
   };
 
@@ -1158,8 +1213,7 @@
             </div>
           </div>`).join('');
       }
-      $('#newsModal').classList.remove('hidden');
-      HistoryManager.push(() => $('#newsModal').classList.add('hidden'), 'news');
+      openSheet('#newsModal', 'news');
     },
   };
 
@@ -1226,14 +1280,15 @@
       $$('.nav-item').forEach(btn => {
         btn.addEventListener('click', (e) => {
           addRipple(e, btn);
-          this.goTo(btn.dataset.page);
+          // nav-item without data-page (e.g., cart center button) is handled via data-action
+          if (btn.dataset.page) this.goTo(btn.dataset.page);
         });
       });
     },
     goTo(page, silent = false) {
       const prev = State.currentPage;
       State.currentPage = page;
-      $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+      $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page && b.dataset.page === page));
       $$('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       if (page === 'favorites') Favorites.render();
@@ -1252,6 +1307,13 @@
   /* ───── 17. GLOBAL ACTIONS ───── */
   const bindGlobalActions = () => {
     document.addEventListener('click', (e) => {
+      // Section "See all" button
+      const seeAllBtn = e.target.closest('[data-see-all]');
+      if (seeAllBtn) {
+        e.stopPropagation();
+        Sections.openAll(seeAllBtn.dataset.seeAll);
+        return;
+      }
       const actionBtn = e.target.closest('[data-action]');
       if (actionBtn) {
         e.stopPropagation();
@@ -1260,6 +1322,7 @@
         switch (action) {
           case 'like': Favorites.toggle(id); break;
           case 'add-cart': Cart.add(id); break;
+          case 'open-cart': Cart.open(); break;
           case 'share':
             const p = findProduct(id);
             if (p && navigator.share) {
@@ -1277,10 +1340,8 @@
       }
       const productEl = e.target.closest('[data-product-id]');
       if (productEl) {
-        // Hero slide click — only the ACTIVE slide is interactive (faqat ko'rinayotgani)
-        if (productEl.classList.contains('hero-slide') && !productEl.classList.contains('active')) {
-          return;
-        }
+        // Skip if click landed on a hero dot or interactive control inside the card
+        if (e.target.closest('.hero-dot') || e.target.closest('[data-action]')) return;
         ProductDetail.open(productEl.dataset.productId);
         return;
       }
@@ -1297,19 +1358,8 @@
       }
     });
 
-    // Header-dagi Savatcha tugmasi (qidiruv o'rnida) — ALMASHTIRILDI
-    $('#cartBtn')?.addEventListener('click', () => Cart.open());
-    // Bottom nav markazidagi tugma — endi QIDIRUV (search o'rnida edi)
-    // (Navigation.bind() data-page="search" ni qaytaradi, qo'shimcha kerakmas)
-
-    // Show all (Hammasi) tugmasi
-    document.addEventListener('click', (e) => {
-      const showAllBtn = e.target.closest('[data-show-all]');
-      if (showAllBtn) {
-        e.stopPropagation();
-        AllProducts.open(showAllBtn.dataset.showAll);
-      }
-    });
+    $('#searchBtn').addEventListener('click', () => Navigation.goTo('search'));
+    // navCartBtn is handled via data-action="open-cart" in the global handler
     $('#notifBtn').addEventListener('click', () => News.open());
     $('#checkoutBtn').addEventListener('click', () => Cart.checkout());
 

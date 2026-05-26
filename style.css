@@ -203,14 +203,21 @@ svg {
   animation: pulse 2s ease-in-out infinite;
 }
 
-.splash-logo-svg {
+.splash-logo-icon {
   width: 64px;
   height: 64px;
-  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
-.splash-logo-icon {
-  font-size: 60px;
+.splash-logo-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.logo-icon svg {
+  width: 26px;
+  height: 26px;
+  display: block;
 }
 
 .splash-title {
@@ -434,13 +441,6 @@ svg {
   justify-content: center;
   font-size: 22px;
   box-shadow: var(--shadow-sm);
-  color: #fff;
-}
-
-.logo-icon svg {
-  width: 26px;
-  height: 26px;
-  color: #fff;
 }
 
 .logo-text {
@@ -514,14 +514,13 @@ svg {
   border-radius: var(--r-full);
   font-size: 10px;
   font-weight: 700;
+  display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 5px;
   border: 2px solid var(--bg-primary);
   transition: transform var(--t-spring);
-  display: none;             /* Default hidden; JS toggles */
 }
-.cart-badge:not([data-empty]) { display: flex; }
 
 .cart-badge.bump {
   animation: cartBump 0.5s var(--t-spring);
@@ -557,10 +556,6 @@ svg {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-/* Section animation — DISABLED to fix double-animation glitch.
-   (Avval section ochilganda 2 marta animatsiya ko'rinardi) */
-.section { animation: none !important; }
 
 .page-header {
   padding: 16px 16px 8px;
@@ -679,18 +674,10 @@ svg {
   inset: 0;
   background: #000;
   z-index: 9500;
-  display: flex !important;
+  display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition: opacity 0.25s ease, visibility 0.25s ease;
-}
-.story-viewer.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+  animation: fadeIn 0.25s ease;
 }
 
 .story-progress-wrap {
@@ -756,8 +743,6 @@ svg {
   align-items: center;
   justify-content: center;
   position: relative;
-  aspect-ratio: 9 / 16;       /* 🚀 9:16 ko'rinish */
-  max-width: 100vw;
 }
 
 .story-content img,
@@ -810,6 +795,29 @@ svg {
   justify-content: space-between;
   padding: 0 16px;
   margin-bottom: 14px;
+  gap: 12px;
+}
+.section-see-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(255, 107, 53, 0.12);
+  border: 1px solid rgba(255, 107, 53, 0.25);
+  padding: 6px 10px 6px 12px;
+  border-radius: var(--r-full);
+  transition: all var(--t-base);
+  white-space: nowrap;
+}
+.section-see-all:active {
+  transform: scale(0.95);
+  background: rgba(255, 107, 53, 0.25);
+}
+.section-see-all svg {
+  width: 14px;
+  height: 14px;
 }
 
 .section-title {
@@ -825,45 +833,80 @@ svg {
   font-weight: 600;
 }
 
-/* HERO SECTION — 16:9, multi-product auto slider */
+/* HERO SECTION (16:9 only) */
 .section-hero {
   padding: 0 16px;
 }
 
-.hero-slider {
+.hero-carousel {
   position: relative;
   border-radius: var(--r-xl);
   overflow: hidden;
-  aspect-ratio: 16 / 9;          /* 🚀 Talab: Hero faqat 16:9 */
+  aspect-ratio: 16 / 9; /* HERO stays 16:9 */
   box-shadow: var(--shadow-lg);
   cursor: pointer;
   background: var(--bg-tertiary);
 }
-
+.hero-track { position: absolute; inset: 0; }
 .hero-slide {
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity 0.9s ease, transform 4s ease-out;
-  transform: scale(1.02);
+  transform: scale(1.04);
+  transition: opacity 0.7s ease, transform 1.2s ease;
   pointer-events: none;
 }
-
 .hero-slide.active {
   opacity: 1;
   transform: scale(1);
   pointer-events: auto;
-  z-index: 2;
 }
-
 .hero-slide img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
-.hero-card:active img { transform: scale(1.05); }
-
+.hero-slide:active img { transform: scale(1.05); }
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.88) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px;
+}
+.hero-title {
+  color: white;
+  font-family: 'Manrope', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 2px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+.hero-sub {
+  color: rgba(255,255,255,0.85);
+  font-size: 13px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.hero-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.hero-badge {
+  background: var(--grad-accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+}
+.hero-badge.soft {
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(6px);
+}
 .hero-dots {
   position: absolute;
   bottom: 12px;
@@ -873,76 +916,21 @@ svg {
   gap: 6px;
   z-index: 3;
 }
-
 .hero-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.45);
-  transition: all var(--t-base);
+  background: rgba(255,255,255,0.45);
   border: none;
   padding: 0;
+  transition: width var(--t-base), background var(--t-base);
   cursor: pointer;
 }
-
 .hero-dot.active {
-  background: #fff;
   width: 22px;
+  background: #fff;
   border-radius: var(--r-full);
 }
-
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.85) 100%);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 20px 20px 32px;
-  z-index: 3;
-  pointer-events: none;
-}
-
-.hero-title {
-  color: white;
-  font-family: 'Manrope', sans-serif;
-  font-size: 22px;
-  font-weight: 800;
-  margin-bottom: 4px;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-}
-
-.hero-meta {
-  display: flex;
-  gap: 8px;
-}
-
-.hero-badge {
-  background: var(--grad-accent);
-  color: white;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: var(--r-full);
-}
-
-/* Section action button "Hammasi" */
-.section-action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  color: var(--accent);
-  font-weight: 700;
-  padding: 6px 12px;
-  background: rgba(255, 107, 53, 0.12);
-  border-radius: var(--r-full);
-  border: 1px solid rgba(255, 107, 53, 0.25);
-  transition: all var(--t-base);
-  cursor: pointer;
-}
-.section-action-btn:active { transform: scale(0.95); background: rgba(255, 107, 53, 0.22); }
-.section-action-btn svg { width: 14px; height: 14px; }
 
 /* CAROUSEL */
 .carousel-scroll {
@@ -1075,6 +1063,46 @@ svg {
   transform: scale(1.06);
 }
 
+/* Multi-image slideshow inside product card */
+.product-img-wrap.has-slideshow .card-slide-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity 0.8s ease, transform 1.6s ease;
+}
+.product-img-wrap.has-slideshow .card-slide-img.active.loaded {
+  opacity: 1;
+  transform: scale(1);
+}
+.product-img-wrap.has-slideshow .card-slide-img.loaded {
+  /* base – only the .active one is visible */
+}
+.card-slide-dots {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  z-index: 2;
+}
+.card-slide-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  transition: width 0.3s ease, background 0.3s ease;
+}
+.card-slide-dot.active {
+  width: 14px;
+  background: #fff;
+  border-radius: var(--r-full);
+}
+
 .product-img-skeleton {
   position: absolute;
   inset: 0;
@@ -1173,57 +1201,44 @@ svg {
 }
 
 .product-model {
-  font-weight: 700;
-  font-size: 13px;
-  margin-bottom: 4px;
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: 'Manrope', sans-serif;
 }
 
-.product-specs {
+.product-specs-mini {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  margin: 4px 0 8px;
-  padding: 6px 8px;
-  background: var(--bg-tertiary);
+  gap: 2px;
+  margin-bottom: 8px;
+  background: rgba(255,255,255,0.03);
   border-radius: var(--r-sm);
-  border-left: 2px solid var(--accent);
+  padding: 6px 8px;
 }
-.product-spec-mini {
+.spec-mini {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 10.5px;
+  line-height: 1.35;
   gap: 6px;
-  font-size: 11px;
-  line-height: 1.3;
 }
-.product-spec-mini-label {
+.spec-mini-label {
   color: var(--text-tertiary);
   font-weight: 500;
-  white-space: nowrap;
+  flex-shrink: 0;
 }
-.product-spec-mini-value {
-  color: var(--text-primary);
-  font-weight: 700;
+.spec-mini-value {
+  color: var(--text-secondary);
+  font-weight: 600;
   text-align: right;
-}
-
-.product-meta {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
-
-.product-meta-item {
-  font-size: 10px;
-  color: var(--text-tertiary);
-  background: var(--bg-tertiary);
-  padding: 2px 6px;
-  border-radius: var(--r-sm);
-  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .product-bottom {
@@ -1233,10 +1248,19 @@ svg {
   gap: 8px;
 }
 
-.product-size {
-  font-size: 11px;
-  color: var(--text-secondary);
-  font-weight: 500;
+.product-material-mini {
+  font-size: 10px;
+  color: var(--accent-light);
+  font-weight: 700;
+  background: rgba(255, 107, 53, 0.12);
+  padding: 3px 8px;
+  border-radius: var(--r-full);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
 }
 
 .btn-add-cart {
@@ -1728,26 +1752,13 @@ svg {
 /* ─────────────────────────────────────────────
    18. BOTTOM SHEET
 ───────────────────────────────────────────── */
-/* Bottom sheet animatsiyasi — .hidden bilan ham silliq ishlash uchun
-   .hidden umumiy `display:none` ni override qilamiz (faqat bottom-sheet uchun) */
 .bottom-sheet {
   position: fixed;
   inset: 0;
   z-index: 8000;
-  display: flex !important;
+  display: flex;
   align-items: flex-end;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-.bottom-sheet.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-.bottom-sheet.hidden .sheet-content {
-  transform: translateY(100%);
+  animation: fadeIn 0.25s ease;
 }
 
 .sheet-overlay {
@@ -1769,12 +1780,8 @@ svg {
   overflow-y: auto;
   border-top: 1px solid var(--border-default);
   box-shadow: 0 -8px 32px rgba(0,0,0,0.6);
-  transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: sheetUp 0.4s var(--t-spring);
   padding-bottom: var(--safe-bottom);
-}
-.bottom-sheet:not(.hidden) .sheet-content {
-  transform: translateY(0);
 }
 
 .sheet-content.tall {
@@ -2487,10 +2494,9 @@ svg {
 }
 .gallery-main {
   position: relative;
-  aspect-ratio: 9 / 16;            /* 🚀 Talab: har bir ko'rinish 9:16 da ochilsin */
+  aspect-ratio: 1/1;
   overflow: hidden;
   background: var(--bg-tertiary);
-  max-height: 70vh;
 }
 .gallery-slide {
   position: absolute;
@@ -2657,24 +2663,6 @@ svg {
   .video-play-pause { opacity: 1; }
 }
 
-/* ───── Story CTA Button ───── */
-.story-cta {
-  position: absolute;
-  bottom: calc(24px + var(--safe-bottom));
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 24px;
-  background: rgba(255, 255, 255, 0.95);
-  color: var(--bg-primary);
-  border-radius: var(--r-full);
-  font-weight: 700;
-  font-size: 14px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-  z-index: 6;
-  transition: transform var(--t-base);
-}
-.story-cta:active { transform: translateX(-50%) scale(0.95); }
-
 /* ───── Stories wrap hidden state ───── */
 .stories-wrap.hidden { display: none; }
 
@@ -2689,31 +2677,134 @@ svg {
 
 /* ───── Product modal must appear ABOVE collection modal ───── */
 #productModal { z-index: 8500; }
-#allProductsModal { z-index: 8400; }
 #cartModal { z-index: 8200; }
 #newsModal { z-index: 8200; }
+#sectionAllModal { z-index: 8100; }
 #collectionModal { z-index: 8000; }
 
-/* ───── All Products Modal body padding ───── */
-#allProductsBody {
-  padding: 8px 16px 24px;
+/* ───── PRODUCT VIEW MODAL = 9:16 RATIO (per request) ───── */
+.gallery-main {
+  aspect-ratio: 9 / 16 !important;
+  max-height: 70vh; /* prevent it from being huge on tablets */
 }
-#allProductsBody .grid-2 {
-  padding: 0;
-  grid-template-columns: 1fr 1fr;
+.product-detail-image:not(.collection-cover) {
+  aspect-ratio: 9 / 16 !important;
+  max-height: 70vh;
 }
-@media (min-width: 600px) {
-  #allProductsBody .grid-2 { grid-template-columns: repeat(3, 1fr); }
+/* Collection cover keeps a wider ratio (collections are landscape banners) */
+.product-detail-image.collection-cover {
+  aspect-ratio: 16 / 9;
 }
 
-/* ───── Section header layout with action button ───── */
-.section-header {
-  gap: 8px;
+/* ───── Fullscreen image viewer — fill the screen ───── */
+.image-viewer img {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
-.section-header .section-title {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+
+/* ───── Section "See all" body ───── */
+.section-all-body {
+  padding: 8px 0 24px;
+  min-height: 200px;
+}
+
+/* ───── Nav center cart badge ───── */
+.nav-center-btn { position: relative; }
+.nav-cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  background: #fff;
+  color: var(--accent-dark);
+  border-radius: var(--r-full);
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  border: 2px solid var(--bg-primary);
+  display: none;
+}
+.nav-cart-badge.bump {
+  animation: cartBump 0.5s var(--t-spring);
+}
+
+/* ───── LIST card specs row ───── */
+.list-card-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.list-card-specs span {
+  background: var(--bg-tertiary);
+  padding: 2px 8px;
+  border-radius: var(--r-sm);
+}
+
+/* ───── Story CTA — ensure visible, on top, fully interactive ───── */
+.story-cta {
+  position: absolute;
+  bottom: calc(32px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 22px;
+  background: var(--grad-accent);
+  color: #fff;
+  border-radius: var(--r-full);
+  font-weight: 800;
+  font-size: 14px;
+  box-shadow: 0 10px 28px rgba(255, 107, 53, 0.45), 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 10;
+  pointer-events: auto;
+  letter-spacing: 0.2px;
+  animation: storyCtaIn 0.6s var(--t-spring) 0.2s both;
+}
+.story-cta svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.story-cta svg:last-child { width: 14px; height: 14px; }
+.story-cta:active { transform: translateX(-50%) scale(0.95); }
+@keyframes storyCtaIn {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Make nav-left/right tap zones smaller so they don't cover the CTA */
+.story-nav-left,
+.story-nav-right {
+  bottom: 100px; /* leave room for CTA */
+}
+
+/* ───── ANIMATION FIX: restart on show, no double-flash ───── */
+.bottom-sheet { animation: fadeIn 0.25s ease both; }
+.bottom-sheet .sheet-content { animation: sheetUp 0.4s var(--t-spring) both; }
+.bottom-sheet.hidden { animation: none !important; }
+.bottom-sheet.hidden .sheet-content { animation: none !important; }
+
+/* ───── Sheet content side fix — no empty space on right ───── */
+.sheet-content {
+  width: 100%;
+  margin: 0;
+  max-width: 100%;
+}
+@media (min-width: 720px) {
+  .sheet-content {
+    max-width: 600px;
+    margin: 0 auto;
+  }
 }
