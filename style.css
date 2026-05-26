@@ -1042,7 +1042,7 @@ svg {
 
 .product-img-wrap {
   position: relative;
-  aspect-ratio: 1;
+  aspect-ratio: 3 / 4;
   background: var(--bg-tertiary);
   overflow: hidden;
 }
@@ -1051,6 +1051,7 @@ svg {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   transition: transform var(--t-slow);
   opacity: 0;
 }
@@ -1070,6 +1071,7 @@ svg {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   opacity: 0;
   transform: scale(1.04);
   transition: opacity 0.8s ease, transform 1.6s ease;
@@ -1843,7 +1845,7 @@ svg {
 /* PRODUCT DETAIL */
 .product-detail-image {
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 3 / 4;
   background: var(--bg-tertiary);
   position: relative;
   overflow: hidden;
@@ -1852,7 +1854,8 @@ svg {
 .product-detail-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
 }
 
 .product-detail-info {
@@ -2491,10 +2494,12 @@ svg {
 .product-detail-gallery {
   position: relative;
   background: var(--bg-tertiary);
+  width: 100%;
 }
 .gallery-main {
   position: relative;
-  aspect-ratio: 1/1;
+  width: 100%;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
   background: var(--bg-tertiary);
 }
@@ -2504,6 +2509,9 @@ svg {
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .gallery-slide.active {
   opacity: 1;
@@ -2512,8 +2520,10 @@ svg {
 .gallery-slide img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   cursor: zoom-in;
+  display: block;
 }
 /* Thumbnails + dots qatori (rasm OSTIDA) */
 .gallery-thumbs-row {
@@ -2682,18 +2692,36 @@ svg {
 #sectionAllModal { z-index: 8100; }
 #collectionModal { z-index: 8000; }
 
-/* ───── PRODUCT VIEW MODAL = 9:16 RATIO (per request) ───── */
+/* ───── PRODUCT VIEW MODAL = FULL WIDTH, TALLER IMAGE ───── */
 .gallery-main {
-  aspect-ratio: 9 / 16 !important;
-  max-height: 70vh; /* prevent it from being huge on tablets */
+  aspect-ratio: 3 / 4 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 80vh;
+}
+.gallery-main img,
+.gallery-slide img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
 }
 .product-detail-image:not(.collection-cover) {
-  aspect-ratio: 9 / 16 !important;
-  max-height: 70vh;
+  aspect-ratio: 3 / 4 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 80vh;
+}
+.product-detail-image:not(.collection-cover) img {
+  object-fit: contain !important;
+  object-position: center !important;
 }
 /* Collection cover keeps a wider ratio (collections are landscape banners) */
 .product-detail-image.collection-cover {
   aspect-ratio: 16 / 9;
+}
+.product-detail-image.collection-cover img {
+  object-fit: cover;
 }
 
 /* ───── Fullscreen image viewer — fill the screen ───── */
@@ -2807,4 +2835,50 @@ svg {
     max-width: 600px;
     margin: 0 auto;
   }
+}
+
+/* ───── PRODUCT MODAL IMAGE — full width, taller, no empty space ───── */
+#productModalBody {
+  width: 100%;
+}
+#productModalBody .product-detail-gallery,
+#productModalBody .product-detail-image {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+#productModalBody .gallery-main {
+  width: 100% !important;
+  max-width: 100% !important;
+  aspect-ratio: 3 / 4 !important;
+  max-height: none;
+  background: var(--bg-tertiary);
+}
+#productModalBody .gallery-main img,
+#productModalBody .gallery-slide img,
+#productModalBody .product-detail-image img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  display: block;
+}
+
+/* Grid & carousel cards — taller image so vertical products show fully */
+.products-grid .product-img-wrap,
+.grid-2 .product-img-wrap,
+.carousel-scroll .product-img-wrap {
+  aspect-ratio: 3 / 4 !important;
+}
+.products-grid .product-img,
+.grid-2 .product-img,
+.carousel-scroll .product-img,
+.products-grid .card-slide-img,
+.grid-2 .card-slide-img,
+.carousel-scroll .card-slide-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
 }
