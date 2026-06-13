@@ -110,8 +110,8 @@ const Collections = {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">📦</div>
-          <h3>To'plamlar topilmadi</h3>
-          <p>3-varaqqa ma'lumot qo'shing</p>
+          <h3>${LanguageManager.t('collectionsEmpty')}</h3>
+          <p>${LanguageManager.t('collectionsEmptySub')}</p>
         </div>`;
       return;
     }
@@ -124,7 +124,7 @@ const Collections = {
           ${col.description ? `<div class="collection-desc">${escapeHTML(col.description)}</div>` : ''}
           <span class="collection-count">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
-            ${col.ids.length} ta mahsulot
+            ${col.ids.length} ${LanguageManager.t('productCount')}
           </span>
         </div>
       </div>`).join('');
@@ -186,12 +186,12 @@ const Search = {
     const surfaces = [...new Set(State.products.map(p => p.surfaceNumber).filter(Boolean))];
     wrap.innerHTML = `
       <div class="filter-row">
-        <button class="filter-chip ${!State.searchFilters.material ? 'active' : ''}" data-fmat="">Hammasi</button>
+        <button class="filter-chip ${!State.searchFilters.material ? 'active' : ''}" data-fmat="">${LanguageManager.t('filterAll')}</button>
         ${materials.map(m => `<button class="filter-chip ${State.searchFilters.material === m ? 'active' : ''}" data-fmat="${escapeHTML(m)}">${escapeHTML(m)}</button>`).join('')}
       </div>
       ${surfaces.length ? `
       <div class="filter-row">
-        <span class="filter-label">Yuza:</span>
+        <span class="filter-label">${LanguageManager.t('filterSurface')}</span>
         <button class="filter-chip small ${!State.searchFilters.surface ? 'active' : ''}" data-fsurf="">—</button>
         ${surfaces.map(s => `<button class="filter-chip small ${State.searchFilters.surface === s ? 'active' : ''}" data-fsurf="${escapeHTML(s)}">${escapeHTML(s)}</button>`).join('')}
       </div>` : ''}
@@ -220,7 +220,7 @@ const Search = {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">🔍</div>
-          <h3>Mahsulot qidiring</h3>
+          <h3>${LanguageManager.t('searchEmpty')}</h3>
           <p>Model, material, yuza yoki ID</p>
         </div>`;
       return;
@@ -244,8 +244,8 @@ const Search = {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">😔</div>
-          <h3>Topilmadi</h3>
-          <p>So'rov yoki filterlarni o'zgartiring</p>
+          <h3>${LanguageManager.t('searchNotFound')}</h3>
+          <p>${LanguageManager.t('searchNotFoundSub')}</p>
         </div>`;
       return;
     }
@@ -277,13 +277,13 @@ const Favorites = {
   render() {
     const container = $('#favoritesContainer');
     const products = State.favorites.map(findProduct).filter(Boolean);
-    $('#favCount').textContent = `${products.length} ta mahsulot`;
+    $('#favCount').textContent = `${products.length} ${LanguageManager.t('productCount')}`;
     if (!products.length) {
       container.innerHTML = `
         <div class="empty-state" style="grid-column: 1/-1;">
           <div class="empty-icon">❤️</div>
-          <h3>Sevimlilar bo'sh</h3>
-          <p>Mahsulotlarga yurakcha bosing</p>
+          <h3>${LanguageManager.t('favEmpty')}</h3>
+          <p>${LanguageManager.t('favEmptySub')}</p>
         </div>`;
       return;
     }

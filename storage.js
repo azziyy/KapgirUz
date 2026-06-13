@@ -59,16 +59,18 @@ const Sheets = {
   },
 
   async loadAll() {
+    // Ma'lumotlar har safar yangilanadi (kesh ishlatilmaydi).
+    // Faqat rasmlar (img src) brauzer tomonidan keshlanadi.
     const [products, sections, collections, news] = await Promise.all([
-      this.fetch(CONFIG.GIDS.products, 'products'),
-      this.fetch(CONFIG.GIDS.sections, 'sections'),
-      this.fetch(CONFIG.GIDS.collections, 'collections'),
-      this.fetch(CONFIG.GIDS.news, 'news'),
+      this.fetch(CONFIG.GIDS.products, null),
+      this.fetch(CONFIG.GIDS.sections, null),
+      this.fetch(CONFIG.GIDS.collections, null),
+      this.fetch(CONFIG.GIDS.news, null),
     ]);
 
     // 1-varaq: BAZA (Products)
-    // A=Model, B=Material, C=Umumiy uzunlik, D=Truba uzunlik, E=Yog'och uzunlik,
-    // F=Yuza raqami, G=Yuza o'lchami, H=ID, I=Rasm1, J=Rasm2, K=Rasm3, L=Video
+    // A=Model, B=Material, C=Umumiy uzunlik, D=Truba uzunlik, E=Kapgir ID,
+    // F=Yuza raqami, G=Yuza o'lchami, H=Eski ID, I=Rasm1, J=Rasm2, K=Rasm3, L=Video
     // Helper: '0.6' -> '06' (Sheets-dagi sonni matn ko'rinishida ko'rsatish)
     const fixModelFmt = (v) => {
       if (v === null || v === undefined) return '';
@@ -79,15 +81,15 @@ const Sheets = {
       if (m) return '0' + m[1];
       return s;
     };
-    State.products = products.filter(r => r._0 || r._7).map(r => ({
+    State.products = products.filter(r => r._0 || r._4).map(r => ({
       model: fixModelFmt(r._0),
       material: r._1 || '',
       totalLength: r._2 || '',
-      tubeLength: r._3 || '',
-      woodLength: r._4 || '',
+      surfaceSize: r._3 || '',    // D ustun — Yuza o'lchami
+      kapgirId: r._4 || '',
       surfaceNumber: r._5 || '',
-      surfaceSize: r._6 || '',
-      id: String(r._7 || r._0 || '').trim(),
+      woodLength: r._6 || '',     // G ustun — Yog'och uzunligi
+      id: String(r._4 || r._0 || '').trim(),
       image: r._8 || '',   // I
       image2: r._9 || '',  // J
       image3: r._10 || '', // K

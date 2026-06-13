@@ -64,20 +64,59 @@ const HistoryManager = {
 /* ───── 19. PWA ───── */
 let deferredPrompt;
 const PWA = {
+  _getInstallText() {
+    const lang = (typeof LanguageManager !== 'undefined') ? LanguageManager.current : 'uz';
+    const texts = {
+      uz: { title: "Ilovani o'rnating", sub: "Tezroq kirish uchun asosiy ekranga qo'shing", btn: "O'rnatish" },
+      ru: { title: "Установите приложение", sub: "Добавьте на главный экран для быстрого доступа", btn: "Установить" },
+      tg: { title: "Барномаро насб кунед", sub: "Барои дастрасии зуд ба экрани асосӣ илова кунед", btn: "Насб кардан" },
+      tr: { title: "Uygulamayı yükleyin", sub: "Hızlı erişim için ana ekrana ekleyin", btn: "Yükle" },
+      en: { title: "Install the app", sub: "Add to home screen for quick access", btn: "Install" },
+      ky: { title: "Тиркемени орнотуңуз", sub: "Тез кирүү үчүн башкы экранга кошуңуз", btn: "Орнотуу" },
+      kk: { title: "Қолданбаны орнатыңыз", sub: "Жылдам кіру үшін негізгі экранға қосыңыз", btn: "Орнату" },
+    };
+    return texts[lang] || texts.uz;
+  },
+  _updatePromptText() {
+    const t = this._getInstallText();
+    const h3 = document.querySelector('#installPrompt .install-text h3');
+    const p  = document.querySelector('#installPrompt .install-text p');
+    const btn = document.getElementById('installBtn');
+    if (h3) h3.textContent = t.title;
+    if (p)  p.textContent  = t.sub;
+    if (btn) btn.textContent = t.btn;
+  },
+  _showPrompt() {
+    this._updatePromptText();
+    $('#installPrompt').classList.remove('hidden');
+  },
   init() {
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
       if (Storage.get('install_dismissed')) return;
-      setTimeout(() => $('#installPrompt').classList.remove('hidden'), 5000);
+      setTimeout(() => this._showPrompt(), 3000);
     });
+    // iOS Safari — no beforeinstallprompt, show manual tip
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (isIOS && !isInStandaloneMode && !Storage.get('install_dismissed')) {
+      setTimeout(() => this._showPrompt(), 3000);
+    }
     $('#installBtn').addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      $('#installPrompt').classList.add('hidden');
-      if (outcome === 'accepted') toast('Ilova o\'rnatildi! 🎉');
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        $('#installPrompt').classList.add('hidden');
+        const lang = (typeof LanguageManager !== 'undefined') ? LanguageManager.current : 'uz';
+        const msgs = { uz: "Ilova o'rnatildi! 🎉", ru: "Приложение установлено! 🎉", tg: "Барнома насб шуд! 🎉", tr: "Uygulama yüklendi! 🎉", en: "App installed! 🎉", ky: "Тиркеме орнотулду! 🎉", kk: "Қолданба орнатылды! 🎉" };
+        if (outcome === 'accepted') toast(msgs[lang] || msgs.uz);
+      } else {
+        // iOS — show tip
+        $('#installPrompt').classList.add('hidden');
+        toast('📲 Share → "Add to Home Screen" tugmasini bosing');
+      }
     });
     $('#installClose').addEventListener('click', () => {
       $('#installPrompt').classList.add('hidden');

@@ -74,6 +74,22 @@
   </div>
 
   <!-- ═══════════════════════════════════════════════════
+       LANGUAGE SELECTION MODAL
+  ═══════════════════════════════════════════════════ -->
+  <div id="langModal" class="modal-overlay lang-modal-overlay hidden">
+    <div class="lang-modal">
+      <div class="lang-modal-header">
+        <div class="lang-modal-logo">🌐</div>
+        <h2 id="langModalTitle">Tilni tanlang</h2>
+        <p id="langModalSubtitle">Qaysi tilda davom etmoqchisiz?</p>
+      </div>
+      <div class="lang-btn-list" id="langBtnList">
+        <!-- Dynamically rendered by LanguageManager.renderModal() -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
        FIRST TIME REGISTRATION MODAL
   ═══════════════════════════════════════════════════ -->
   <div id="registerModal" class="modal-overlay hidden">
@@ -94,7 +110,7 @@
         </div>
         <div class="form-group">
           <label>Telefon raqam</label>
-          <input type="tel" id="userPhone" placeholder="+998 90 123 45 67" value="+998 " required />
+          <input type="tel" id="userPhone" placeholder="+998 __ ___ __ __" value="+998 " required />
         </div>
         <button type="submit" class="btn-primary">Davom etish</button>
       </form>
@@ -182,8 +198,8 @@
       <!-- COLLECTIONS PAGE -->
       <section class="page" id="page-collections">
         <div class="page-header">
-          <h1 class="page-title">To'plamlar</h1>
-          <p class="page-subtitle">Premium kolleksiyalar</p>
+          <h1 class="page-title" id="collectionsPageTitle">To'plamlar</h1>
+          <p class="page-subtitle" id="collectionsPageSub">Premium kolleksiyalar</p>
         </div>
         <div id="collectionsContainer" class="collections-grid">
           <div class="section-skeleton">
@@ -208,8 +224,8 @@
         <div id="searchResults" class="search-results">
           <div class="empty-state">
             <div class="empty-icon">🔍</div>
-            <h3>Mahsulot qidiring</h3>
-            <p>Model raqami, material yoki yuza raqami</p>
+            <h3 id="searchEmptyH3">Mahsulot qidiring</h3>
+            <p id="searchEmptyP">Model raqami, material yoki yuza raqami</p>
           </div>
         </div>
       </section>
@@ -217,7 +233,7 @@
       <!-- FAVORITES PAGE -->
       <section class="page" id="page-favorites">
         <div class="page-header">
-          <h1 class="page-title">Sevimlilar</h1>
+          <h1 class="page-title" id="favPageTitle">Sevimlilar</h1>
           <p class="page-subtitle" id="favCount">0 ta mahsulot</p>
         </div>
         <div id="favoritesContainer" class="products-grid">
@@ -279,6 +295,13 @@
             <span>YouTube</span>
             <svg class="menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
           </a>
+          <button class="profile-menu-item" id="changeLangBtn">
+            <div class="menu-icon lang-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <span id="changeLangBtnLabel">Tilni almashtirish</span>
+            <svg class="menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
           <button class="profile-menu-item" id="shareAppBtn">
             <div class="menu-icon share-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
@@ -286,20 +309,8 @@
             <span>Ilovani ulashish</span>
             <svg class="menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
           </button>
-          <button class="profile-menu-item danger" id="clearCacheBtn">
-            <div class="menu-icon clear-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-            </div>
-            <span>Cache tozalash</span>
-            <svg class="menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-          </button>
-          <button class="profile-menu-item update-app" id="updateAppBtn">
-            <div class="menu-icon update-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3.51-7.13"/><polyline points="21 4 21 10 15 10"/></svg>
-            </div>
-            <span>Dasturni yangilash</span>
-            <svg class="menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-          </button>
+
+
         </div>
 
         <div class="profile-footer">
@@ -462,7 +473,7 @@
     <div class="install-icon">📲</div>
     <div class="install-text">
       <h3>Ilovani o'rnating</h3>
-      <p>Tezroq kirish uchun</p>
+      <p>Tezroq kirish uchun asosiy ekranga qo'shing</p>
     </div>
     <button id="installBtn" class="btn-install">O'rnatish</button>
     <button id="installClose" class="install-close">
@@ -481,6 +492,7 @@
   <!-- Main Scripts (vazifaga ko'ra bo'lingan) -->
   <!-- Yuklash tartibi muhim: pastdagi fayllar yuqoridagilarga tayanadi -->
   <script src="config.js"></script>        <!-- CONFIG, State, interval helperlari -->
+  <script src="lang.js"></script>          <!-- LanguageManager, TRANSLATIONS -->
   <script src="storage.js"></script>       <!-- Storage, Sheets (Google Sheets data) -->
   <script src="helpers.js"></script>       <!-- $, escapeHTML, fixImageUrl, toast, lazyImg, observerlar -->
   <script src="product-card.js"></script>  <!-- Product card render, Sections (hero/carousel/grid/list), openSheet -->

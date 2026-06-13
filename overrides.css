@@ -901,3 +901,132 @@ img, svg, video {
 svg * {
   max-width: none !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   29. LANGUAGE SELECTION MODAL
+═══════════════════════════════════════════════════════════════ */
+
+.lang-modal-overlay {
+  z-index: 9500;
+  animation: fadeIn 0.35s ease;
+}
+
+.lang-modal {
+  width: 100%;
+  max-width: 380px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-2xl);
+  padding: 32px 20px 24px;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.4s var(--t-spring);
+}
+
+.lang-modal-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.lang-modal-logo {
+  font-size: 44px;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.lang-modal-header h2 {
+  font-family: 'Manrope', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.lang-modal-header p {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.lang-btn-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* O'zbek — yuqorida to'liq keng */
+.lang-grid-uz {
+  display: block;
+}
+
+.lang-grid-uz .lang-btn {
+  width: 100%;
+  justify-content: center;
+  gap: 12px;
+  font-size: 15px;
+  min-height: 58px;
+}
+
+.lang-btn--wide {
+  width: 100%;
+  justify-content: center !important;
+  font-size: 15px;
+}
+
+/* Qolgan 6 til — 2 ustun × 3 qator */
+.lang-grid-other {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-tertiary);
+  border: 1.5px solid var(--border-default);
+  border-radius: var(--r-lg);
+  padding: 14px 14px;
+  cursor: pointer;
+  transition: all 0.2s var(--t-base);
+  position: relative;
+  text-align: left;
+  min-height: 56px;
+  color: var(--text-primary);
+}
+
+.lang-btn:active {
+  transform: scale(0.96);
+}
+
+.lang-btn:hover {
+  border-color: var(--accent);
+  background: var(--bg-elevated);
+}
+
+.lang-btn--active {
+  border-color: var(--accent) !important;
+  background: rgba(255, 107, 53, 0.12) !important;
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.lang-flag {
+  font-size: 24px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.lang-label {
+  font-size: 14px;
+  font-weight: 600;
+  flex: 1;
+  line-height: 1.2;
+}
+
+.lang-check {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 700;
+}

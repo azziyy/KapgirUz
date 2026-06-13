@@ -98,9 +98,15 @@ const Cart = {
     }).join('');
   },
   checkout() {
-    if (!State.cart.length) { toast('Savatcha bo\'sh'); return; }
+    if (!State.cart.length) { toast(LanguageManager.t('cartEmpty')); return; }
     const user = State.user;
-    if (!user) { toast('Iltimos ma\'lumotlaringizni kiriting'); return; }
+    if (!user) {
+      // Ro'yxatdan o'tilmagan — registratsiya modalini ko'rsatamiz
+      // Ro'yxatdan o'tgandan keyin avtomatik buyurtma yuboriladi
+      State._pendingCheckout = true;
+      Registration.show();
+      return;
+    }
     let text = `🛒 *Yangi buyurtma*\n\n`;
     text += `👤 *Mijoz:*\n${user.name} ${user.surname}\n📞 ${user.phone}\n\n`;
     text += `📦 *Buyurtmalar:*\n`;
@@ -111,7 +117,7 @@ const Cart = {
       text += `   • Material: ${p.material}\n`;
       if (p.totalLength) text += `   • Uzunlik: ${formatSize(p.totalLength)}\n`;
       if (p.surfaceNumber) text += `   • Yuza: ${p.surfaceNumber}\n`;
-      text += `   • Soni: ${item.qty} dona\n`;
+      text += `   • Soni: ${item.qty} ${LanguageManager.t('dona')}\n`;
     });
     text += `\n📅 ${new Date().toLocaleString('uz-UZ')}`;
     const url = `https://t.me/${CONFIG.TELEGRAM_USERNAME}?text=${encodeURIComponent(text)}`;
@@ -129,7 +135,7 @@ const ProductDetail = {
           <button class="detail-qty-btn" data-action="qty-down" data-id="${escapeHTML(id)}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14"/></svg>
           </button>
-          <span class="detail-qty-value">${qty} dona</span>
+          <span class="detail-qty-value">${qty} ${LanguageManager.t('dona')}</span>
           <button class="detail-qty-btn" data-action="qty-up" data-id="${escapeHTML(id)}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5v14"/></svg>
           </button>
@@ -180,14 +186,13 @@ const ProductDetail = {
           </div>` : ''}
       </div>
       <div class="product-detail-info">
-        <h2 class="product-detail-title">${escapeHTML(p.model)}</h2>
+        <h2 class="product-detail-title"><span class="detail-model-label">${LanguageManager.t('modelLabel')} </span>${escapeHTML(p.model)}</h2>
         ${p.material ? `<div class="product-detail-material">${escapeHTML(p.material)}</div>` : ''}
         <div class="product-spec-list">
-          ${p.totalLength ? `<div class="product-spec-row"><span class="product-spec-label">Umumiy uzunligi</span><span class="product-spec-value">${formatSize(p.totalLength)}</span></div>` : ''}
-          ${p.tubeLength ? `<div class="product-spec-row"><span class="product-spec-label">Truba uzunligi</span><span class="product-spec-value">${formatSize(p.tubeLength)}</span></div>` : ''}
-          ${p.woodLength ? `<div class="product-spec-row"><span class="product-spec-label">Yog'och uzunligi</span><span class="product-spec-value">${formatSize(p.woodLength)}</span></div>` : ''}
-          ${p.surfaceNumber ? `<div class="product-spec-row"><span class="product-spec-label">Yuza raqami</span><span class="product-spec-value">${escapeHTML(p.surfaceNumber)}</span></div>` : ''}
-          ${p.surfaceSize ? `<div class="product-spec-row"><span class="product-spec-label">Yuza o'lchami</span><span class="product-spec-value">${escapeHTML(p.surfaceSize)}</span></div>` : ''}
+          ${p.totalLength ? `<div class="product-spec-row"><span class="product-spec-label">${LanguageManager.t('specTotalLen')}</span><span class="product-spec-value">${formatSize(p.totalLength)}</span></div>` : ''}
+          ${p.surfaceSize ? `<div class="product-spec-row"><span class="product-spec-label">${LanguageManager.t('specSurfaceSize')}</span><span class="product-spec-value">${escapeHTML(p.surfaceSize)}</span></div>` : ''}
+          ${p.woodLength ? `<div class="product-spec-row"><span class="product-spec-label">${LanguageManager.t('specWoodLen')}</span><span class="product-spec-value">${formatSize(p.woodLength)}</span></div>` : ''}
+          ${p.surfaceNumber ? `<div class="product-spec-row"><span class="product-spec-label">${LanguageManager.t('specSurfaceNum')}</span><span class="product-spec-value">${escapeHTML(p.surfaceNumber)}</span></div>` : ''}
           <div class="product-spec-row"><span class="product-spec-label">ID</span><span class="product-spec-value">#${escapeHTML(p.id)}</span></div>
         </div>
       </div>

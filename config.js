@@ -17,6 +17,7 @@ const CONFIG = {
     CART: 'kapgir_cart',
     VIEWED_STORIES: 'kapgir_viewed_stories',
     CACHE: 'kapgir_cache_',
+    LANG: 'kapgir_lang',
   },
   STORY_DURATION: 5000,
   PLACEHOLDER_IMG: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect fill="%231a1a25" width="400" height="400"/><g transform="translate(140 130) scale(2.2)"><rect x="36" y="4" width="6" height="30" rx="3" fill="%23ff6b35" transform="rotate(28 39 19)"/><circle cx="24" cy="42" r="18" fill="%23ff6b35"/><circle cx="16" cy="36" r="2" fill="%231a1a25"/><circle cx="24" cy="33" r="2" fill="%231a1a25"/><circle cx="32" cy="36" r="2" fill="%231a1a25"/><circle cx="13" cy="44" r="2" fill="%231a1a25"/><circle cx="24" cy="42" r="2" fill="%231a1a25"/><circle cx="35" cy="44" r="2" fill="%231a1a25"/><circle cx="16" cy="50" r="2" fill="%231a1a25"/><circle cx="24" cy="52" r="2" fill="%231a1a25"/><circle cx="32" cy="50" r="2" fill="%231a1a25"/></g></svg>',

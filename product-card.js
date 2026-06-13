@@ -55,12 +55,10 @@ const renderProductCard = (product) => {
         </div>
       </div>
       <div class="product-info">
-        <div class="product-model">Model ${escapeHTML(product.model || product.id)}</div>
+        <div class="product-model"><span class="product-model-label">${LanguageManager.t('modelLabel')} </span>${escapeHTML(product.model || product.id)}</div>
         <div class="product-specs-mini">
-          ${product.totalLength ? `<div class="spec-mini"><span class="spec-mini-label">Umumiy</span><span class="spec-mini-value">${formatSize(product.totalLength)}</span></div>` : ''}
-          ${product.tubeLength ? `<div class="spec-mini"><span class="spec-mini-label">Truba</span><span class="spec-mini-value">${formatSize(product.tubeLength)}</span></div>` : ''}
-          ${product.woodLength ? `<div class="spec-mini"><span class="spec-mini-label">Yog'och</span><span class="spec-mini-value">${formatSize(product.woodLength)}</span></div>` : ''}
-          ${product.surfaceNumber ? `<div class="spec-mini"><span class="spec-mini-label">Yuza</span><span class="spec-mini-value">№ ${escapeHTML(product.surfaceNumber)}${product.surfaceSize ? ' • ' + escapeHTML(product.surfaceSize) : ''}</span></div>` : ''}
+          ${product.totalLength ? `<div class="spec-mini"><span class="spec-mini-label">${LanguageManager.t('specTotalLen')}</span><span class="spec-mini-value">${formatSize(product.totalLength)}</span></div>` : ''}
+          ${product.surfaceSize ? `<div class="spec-mini"><span class="spec-mini-label">${LanguageManager.t('specSurfaceSize')}</span><span class="spec-mini-value">${escapeHTML(product.surfaceSize)}</span></div>` : ''}
         </div>
         <div class="product-bottom">
           ${product.material ? `<span class="product-material-mini">${escapeHTML(product.material)}</span>` : '<span></span>'}
@@ -222,7 +220,7 @@ const Sections = {
                 <div class="list-card-title">Model ${escapeHTML(p.model)}</div>
                 <div class="list-card-meta">${p.material ? escapeHTML(p.material) + ' • ' : ''}${formatSize(p.totalLength)}</div>
                 <div class="list-card-specs">
-                  ${p.tubeLength ? `<span>Truba: ${formatSize(p.tubeLength)}</span>` : ''}
+                  ${p.surfaceSize ? `<span>${LanguageManager.t('specSurfaceSize')}: ${escapeHTML(p.surfaceSize)}</span>` : ''}
                   ${p.woodLength ? `<span>Yog'och: ${formatSize(p.woodLength)}</span>` : ''}
                   ${p.surfaceNumber ? `<span>Yuza: №${escapeHTML(p.surfaceNumber)}</span>` : ''}
                 </div>

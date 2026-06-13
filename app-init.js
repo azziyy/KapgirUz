@@ -115,10 +115,20 @@ const App = {
     setTimeout(() => $('#splash').remove(), 600);
     $('#app').classList.remove('hidden');
 
-    if (!State.user) Registration.show();
-    else Profile.render();
-
-    this.renderAll();
+    // Til tanlash: birinchi marta kirganida til tanlash modalini ko'rsatamiz
+    const langAlreadySet = LanguageManager.load();
+    if (!langAlreadySet) {
+      // Birinchi kirish — til tanlash modalini ko'rsatamiz
+      LanguageManager.show(() => {
+        if (State.user) Profile.render();
+        App.renderAll();
+      });
+    } else {
+      // Til allaqachon saqlangan — UI ga til qo'llaymiz
+      LanguageManager.applyToUI();
+      if (State.user) Profile.render();
+      this.renderAll();
+    }
   },
   renderAll() {
     Stories.render();
@@ -129,10 +139,10 @@ const App = {
     Search.renderFilters();
   },
   async refresh() {
-    Object.keys(localStorage).filter(k => k.startsWith(CONFIG.STORAGE_KEYS.CACHE)).forEach(k => localStorage.removeItem(k));
+    // Ma'lumotlar har safar yangilanadi — kesh tozalashning hojati yo'q
     await Sheets.loadAll();
     this.renderAll();
-    toast('Yangilandi');
+    toast('Yangilandi ✓');
   },
 };
 

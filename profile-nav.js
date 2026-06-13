@@ -18,82 +18,54 @@ const Profile = {
       $('#userName').value = State.user?.name || '';
       $('#userSurname').value = State.user?.surname || '';
       const ph = State.user?.phone || '';
-      $('#userPhone').value = ph || '+998 ';
+      const _prefix = (typeof LanguageManager !== 'undefined') ? LanguageManager.getPhonePrefix() : '+998 ';
+      $('#userPhone').value = ph || _prefix;
       $('#registerModal').classList.remove('hidden');
     });
     // Telefon inputiga +998 prefiksini doimiy qo'yib turish
     const phoneInput = $('#userPhone');
     if (phoneInput) {
+      const getPrefix = () => (typeof LanguageManager !== 'undefined') ? LanguageManager.getPhonePrefix() : '+998 ';
       const ensurePrefix = () => {
-        if (!phoneInput.value || !phoneInput.value.startsWith('+998')) {
-          phoneInput.value = '+998 ' + (phoneInput.value || '').replace(/^\+?998\s*/, '');
+        const pfx = getPrefix();
+        if (!phoneInput.value || !phoneInput.value.startsWith(pfx.trim())) {
+          phoneInput.value = pfx + (phoneInput.value || '').replace(/^\+[\d]+\s*/, '');
         }
       };
       phoneInput.addEventListener('focus', ensurePrefix);
       phoneInput.addEventListener('input', () => {
-        // Foydalanuvchi +998 ni o'chirib yubormasin
-        if (!phoneInput.value.startsWith('+998')) {
-          const digits = phoneInput.value.replace(/\D/g, '').replace(/^998/, '');
-          phoneInput.value = '+998 ' + digits;
+        const pfx = getPrefix();
+        if (!phoneInput.value.startsWith(pfx.trim())) {
+          const digits = phoneInput.value.replace(/\D/g, '');
+          phoneInput.value = pfx + digits;
         }
       });
       phoneInput.addEventListener('keydown', (e) => {
-        // Cursor +998 dan oldinga o'tib o'chirishga urinishga to'sqinlik
-        if ((e.key === 'Backspace' || e.key === 'Delete') && phoneInput.selectionStart <= 5) {
+        const pfx = getPrefix();
+        if ((e.key === 'Backspace' || e.key === 'Delete') && phoneInput.selectionStart <= pfx.length) {
           e.preventDefault();
         }
       });
       // Sahifa yuklanganda standart qiymat
-      if (!phoneInput.value) phoneInput.value = '+998 ';
+      if (!phoneInput.value) phoneInput.value = getPrefix();
     }
     $('#shareAppBtn').addEventListener('click', async () => {
       const data = { title: 'Kapgir Premium', text: 'Premium oshxona anjomlari', url: window.location.href };
       if (navigator.share) { try { await navigator.share(data); } catch (e) {} }
       else { await navigator.clipboard?.writeText(window.location.href); toast('Havola nusxalandi'); }
     });
-    $('#clearCacheBtn').addEventListener('click', () => {
-      if (confirm('Hamma ma\'lumotlar o\'chiriladi. Davom etilsinmi?')) { Storage.clearAll(); location.reload(); }
-    });
-    // Dasturni yangilash — barcha keshlarni tozalab to'liq qayta ishga tushirish
-    const updateBtn = $('#updateAppBtn');
-    if (updateBtn) {
-      updateBtn.addEventListener('click', async () => {
-        if (!confirm('Dastur yangilanadi va barcha keshlar tozalanadi. Davom etilsinmi?')) return;
-        // Show toast (will be cleared by reload)
-        try { toast('Yangilanmoqda...'); } catch (e) {}
-        try {
-          // 1) localStorage — barcha kapgir keshlari
-          Storage.clearAll();
-          // 2) sessionStorage
-          try { sessionStorage.clear(); } catch (e) {}
-          // 3) Service Worker cache (CacheStorage)
-          if ('caches' in window) {
-            try {
-              const keys = await caches.keys();
-              await Promise.all(keys.map(k => caches.delete(k)));
-            } catch (e) { console.warn('Cache delete failed', e); }
-          }
-          // 4) Service Worker'larni o'chirish
-          if ('serviceWorker' in navigator) {
-            try {
-              const regs = await navigator.serviceWorker.getRegistrations();
-              await Promise.all(regs.map(r => r.unregister()));
-            } catch (e) { console.warn('SW unregister failed', e); }
-          }
-        } catch (e) {
-          console.error('Update failed', e);
-        } finally {
-          // 5) Qattiq qayta yuklash — cache bypass uchun timestamp qo'shamiz
-          setTimeout(() => {
-            try {
-              const u = new URL(window.location.href);
-              u.searchParams.set('_v', Date.now().toString());
-              window.location.replace(u.toString());
-            } catch (e) {
-              window.location.reload();
-            }
-          }, 400);
-        }
+    // Til almashtirish tugmasi
+    const changeLangBtn = $('#changeLangBtn');
+    if (changeLangBtn) {
+      changeLangBtn.addEventListener('click', () => {
+        LanguageManager.show((code) => {
+          LanguageManager.applyToUI();
+          // Render sections/favorites again so dynamic text updates
+          if (typeof Sections !== 'undefined') Sections.render();
+          if (typeof Collections !== 'undefined') Collections.render();
+          if (typeof Favorites !== 'undefined') Favorites.render();
+          if (typeof Search !== 'undefined') { Search.renderFilters(); }
+        });
       });
     }
   },
@@ -218,29 +190,41 @@ const bindGlobalActions = () => {
 
 /* ───── 18. REGISTRATION ───── */
 const Registration = {
-  show() { $('#registerModal').classList.remove('hidden'); },
+  show() {
+    $('#registerModal').classList.remove('hidden');
+    const phoneInput = $('#userPhone');
+    if (phoneInput && (!phoneInput.value || phoneInput.value === '+998 ')) {
+      const pfx = (typeof LanguageManager !== 'undefined') ? LanguageManager.getPhonePrefix() : '+998 ';
+      phoneInput.value = pfx;
+      phoneInput.placeholder = pfx + '__ ___ __ __';
+    }
+  },
   hide() { $('#registerModal').classList.add('hidden'); },
   bind() {
     // Telefon inputiga +998 prefiksini doimiy qo'yib turish
     const phoneInput = $('#userPhone');
     if (phoneInput) {
-      if (!phoneInput.value) phoneInput.value = '+998 ';
+      const getRegPrefix = () => (typeof LanguageManager !== 'undefined') ? LanguageManager.getPhonePrefix() : '+998 ';
+      if (!phoneInput.value) phoneInput.value = getRegPrefix();
       phoneInput.addEventListener('focus', () => {
-        if (!phoneInput.value.startsWith('+998')) phoneInput.value = '+998 ';
-        // Kursor +998 dan keyin tursin
+        const pfx = getRegPrefix();
+        if (!phoneInput.value.startsWith(pfx.trim())) phoneInput.value = pfx;
+        // Kursor prefixdan keyin tursin
         setTimeout(() => {
           const v = phoneInput.value;
           phoneInput.setSelectionRange(v.length, v.length);
         }, 0);
       });
       phoneInput.addEventListener('input', () => {
-        if (!phoneInput.value.startsWith('+998')) {
-          const digits = phoneInput.value.replace(/\D/g, '').replace(/^998/, '');
-          phoneInput.value = '+998 ' + digits;
+        const pfx = getRegPrefix();
+        if (!phoneInput.value.startsWith(pfx.trim())) {
+          const digits = phoneInput.value.replace(/\D/g, '');
+          phoneInput.value = pfx + digits;
         }
       });
       phoneInput.addEventListener('keydown', (e) => {
-        if ((e.key === 'Backspace' || e.key === 'Delete') && phoneInput.selectionStart <= 5) {
+        const pfx = getRegPrefix();
+        if ((e.key === 'Backspace' || e.key === 'Delete') && phoneInput.selectionStart <= pfx.length) {
           e.preventDefault();
         }
       });
@@ -250,13 +234,19 @@ const Registration = {
       const name = $('#userName').value.trim();
       const surname = $('#userSurname').value.trim();
       let phone = $('#userPhone').value.trim();
-      if (!phone || phone === '+998' || phone === '+998 ') phone = '';
+      const _pfx = (typeof LanguageManager !== 'undefined') ? LanguageManager.getPhonePrefix().trim() : '+998';
+      if (!phone || phone === _pfx) phone = '';
       if (!name || !surname || !phone) return;
       State.user = { name, surname, phone };
       Storage.set(CONFIG.STORAGE_KEYS.USER, State.user);
       this.hide();
       Profile.render();
-      toast('Xush kelibsiz!');
+      toast(LanguageManager.t('welcomeToast'));
+      // Agar buyurtma uchun ro'yxatdan o'tilgan bo'lsa — buyurtmani davom ettirish
+      if (State._pendingCheckout) {
+        State._pendingCheckout = false;
+        setTimeout(() => Cart.checkout(), 400);
+      }
     });
   },
 };
